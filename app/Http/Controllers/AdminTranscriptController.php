@@ -253,16 +253,43 @@ class AdminTranscriptController extends Controller
                         'student_personal_details.index_no',
                         'student_academic_details.final_gpa',
                         'student_academic_details.class',
+                        'student_academic_details.registration_date',
                         'student_academic_details.degree_effective_date',
                         DB::raw('IFNULL(master_course_specialization_categories.name,"") as specialization'),
                         'master_degree_programs.name as program',
+                        'master_degree_programs.short_name as program_short'
                     )->get();
 
         if($students){
             $studentIds = [];
             foreach($students as $std){
-               $data[$std->id] = ['id'=>$std->id,'full_name'=>$std->full_name,'registration_no'=>$std->registration_no,'index_no'=>$std->index_no,'gpa'=>$std->final_gpa,'effective_date'=>$std->degree_effective_date,'class'=>$std->class,'program'=>$std->program,'specialization'=>$std->specialization,'results'=>[]];
-               $studentIds[] =$std->id;
+               $admissionDate = $std->registration_date ? date('d F Y', strtotime($std->registration_date)) : '';
+               $effectiveDate = $std->degree_effective_date ? date('d F Y', strtotime($std->degree_effective_date)) : '';
+               $docYear = $std->degree_effective_date ? date('Y', strtotime($std->degree_effective_date)) : date('Y');
+               $docId = 'RUSL/FOA/' . $docYear . '/TR/' . str_pad($std->id, 3, '0', STR_PAD_LEFT);
+               $verifyUrl = url('/verify/transcript/' . str_replace('/', '-', $std->index_no));
+
+               $data[$std->id] = [
+                   'id' => $std->id,
+                   'full_name' => $std->full_name,
+                   'registration_no' => $std->registration_no,
+                   'index_no' => $std->index_no,
+                   'gpa' => $std->final_gpa,
+                   'effective_date' => $effectiveDate,
+                   'admission_date' => $admissionDate,
+                   'document_id' => $docId,
+                   'verify_url' => $verifyUrl,
+                   'class' => $std->class,
+                   'program' => $std->program,
+                   'program_short' => $std->program_short ? '[' . $std->program_short . ']' : '[BSc Hons (Agri)]',
+                   'specialization' => $std->specialization,
+                   'slqf_level' => 'Level 6',
+                   'duration' => 'Four Academic Years',
+                   'total_credits' => 0,
+                   'semester_stats' => [],
+                   'results' => []
+               ];
+               $studentIds[] = $std->id;
             } 
 
             $subjectIds = [];
@@ -301,11 +328,52 @@ class AdminTranscriptController extends Controller
                     }
                 }
                 $grades =  CourseGrade::where('upper_mark_limit','>',0)->orderBy('upper_mark_limit','desc')->get();
+                $gradePointMap = \Illuminate\Support\Arr::pluck(CourseGrade::all()->toArray(), 'grade_point', 'grade');
                 $optSubSemStart = Settings::where('name','=','sp_select_semster')->first();
+
+                // Compute semester-wise credits earned, semester GPA, and overall total credits
+                foreach($data as $studentId => &$studentData){
+                    $overallCredits = 0;
+                    for($yr = 1; $yr <= 4; $yr++){
+                        if(!isset($subjects[$yr])) continue;
+                        foreach($subjects[$yr] as $semKey => $semSubjects){
+                            $semCredits = 0;
+                            $semGpaCredits = 0;
+                            $semGpaWeighted = 0;
+
+                            foreach($semSubjects as $subId => $subject){
+                                if(!isset($studentData['results'][$subId])) continue;
+
+                                $grade = $studentData['results'][$subId]['grade'];
+                                $isNonGpa = ($subject['credits'] == 0 || in_array(trim($subject['code']), ['ES 1102', 'AS 1101', 'EG 1101', 'IT 1101', 'EG 1201', 'IT 1201', 'ES 3103', 'AF 3102', 'PS 3224', 'CC 3201']));
+
+                                // If student obtained a passing grade (not F, AB, MCA, NE)
+                                if(!in_array($grade, ['F', 'AB', 'MCA', 'NE', '-'])){
+                                    $semCredits += $subject['credits'];
+                                }
+
+                                if(!$isNonGpa && isset($gradePointMap[$grade])){
+                                    $gp = (float)$gradePointMap[$grade];
+                                    $semGpaWeighted += ($gp * $subject['credits']);
+                                    $semGpaCredits += $subject['credits'];
+                                }
+                            }
+
+                            $calculatedSemGpa = $semGpaCredits > 0 ? number_format($semGpaWeighted / $semGpaCredits, 2) : '0.00';
+                            $studentData['semester_stats'][$yr][$semKey] = [
+                                'credits' => $semCredits,
+                                'gpa' => $calculatedSemGpa
+                            ];
+                            $overallCredits += $semCredits;
+                        }
+                    }
+                    $studentData['total_credits'] = $overallCredits;
+                }
+                unset($studentData);
 
                 $submitto = $request->submitto;
 
-                $pdf = PDF::loadView('admin.transcripts.pdf.full-transcript-with-grades',['data'=>$data,'subjects'=>$subjects,'grades'=>$grades,'optSubSemStart'=>$optSubSemStart->value,'submitto'=>$submitto])->setPaper('a4', 'portrait');                      
+                $pdf = PDF::loadView('admin.transcripts.pdf.new-full-transcript',['data'=>$data,'subjects'=>$subjects,'grades'=>$grades,'gradePointMap'=>$gradePointMap,'optSubSemStart'=>$optSubSemStart->value,'submitto'=>$submitto])->setPaper('a4', 'portrait');                      
                 return $pdf->download('transcripts.pdf');
 
             }
