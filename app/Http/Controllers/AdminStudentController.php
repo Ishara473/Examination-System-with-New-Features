@@ -1116,7 +1116,6 @@ class AdminStudentController extends Controller{
                             'student_academic_details.registration_date',
                             'student_academic_details.current_study_year',
                             'master_degree_programs.name as degree_program',
-                            'master_degree_programs.short_name as degree_short_name',
                             'master_course_specialization_categories.name as specialization'
                         )
                         ->first();
@@ -1128,15 +1127,9 @@ class AdminStudentController extends Controller{
         $genderTitle = ($student->gender == 1) ? 'Mr.' : 'Ms.';
         $studentName = $genderTitle . ' ' . $student->initials . ' ' . $student->name_marking;
 
-        $degreeName = 'Bachelor of Agriculture';
-        if(!empty($student->specialization) && str_contains(strtolower($student->degree_program), 'honours')){
-            $degreeName = 'Bachelor of Science Honours in Agriculture Degree';
-        }
-
-        $degreeDuration = 'four years';
-        if(str_contains(strtolower($student->degree_short_name), '3') || str_contains(strtolower($student->degree_program), '3')){
-            $degreeDuration = 'three years';
-        }
+        $degreeName = $student->degree_program;
+        $isHonoursDegree = str_contains(strtolower($student->degree_program), 'honours');
+        $degreeDuration = $isHonoursDegree ? 'four years' : 'three years';
 
         $registrationDate = Carbon::parse($student->registration_date);
         $formattedDate = $registrationDate->format('jS F Y');
