@@ -81,6 +81,7 @@ table.ct .c-cr { text-align: center; padding-left: 0.5mm; padding-right: 0.5mm; 
 table.ct .c-gr { text-align: center; padding-left: 0.5mm; padding-right: 0.5mm; }
 table.ct th.c-title, table.ct th.c-cr, table.ct th.c-gr, table.ct th.c-code { text-align: center; }
 table.ct td.rt { height: 9mm; vertical-align: top; white-space: normal; }
+table.ct td.c-rt-lbl { font-size: 6.7pt; font-weight: normal; line-height: 8.5px; vertical-align: top; padding: 1.0mm 0.8mm; text-align: left; white-space: normal; }
 img.dg { vertical-align: baseline; margin-left: 1px; }
 
 .semsum { font-size: 6.9pt; font-weight: bold; margin-top: 1.2mm; line-height: 9px; white-space: nowrap; }
@@ -457,8 +458,8 @@ table.sigs td { width: 33.33%; border: .5pt solid #000000; height: 13mm; vertica
                   </tr>
                   @if(stripos($sub['name'], 'Research Project') !== false)
                     <tr>
-                      <td class="c-code" style="font-weight:bold;font-size:7pt;">Research Title</td>
-                      <td class="c-title rt" colspan="3" style="font-style:italic;">[Title of Research Project]</td>
+                      <td class="c-rt-lbl">Research<br>Title</td>
+                      <td class="c-title rt" colspan="3">{{ $student['research_title'] ?? '' }}</td>
                     </tr>
                   @endif
                 @endif
