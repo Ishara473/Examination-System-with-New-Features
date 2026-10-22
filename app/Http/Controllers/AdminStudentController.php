@@ -1101,6 +1101,50 @@ class AdminStudentController extends Controller{
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        // Validate student exists
+        $studentPersonal = Student::where('registration_no', $request->registration_no)->first();
+        if (empty($studentPersonal)) {
+            return redirect()->back()->with('error', 'Student not found with this registration number.')->withInput();
+        }
+
+        // Fetch academic details
+        $academicDetail = StudentAccDetail::where('student_id', $studentPersonal->id)->first();
+
+        // 1. Check if student has graduated
+        if ($studentPersonal->status == 2 || (!empty($academicDetail) && ($academicDetail->status == 2 || $academicDetail->is_complete == 1))) {
+            return redirect()->back()->with('error', 'This student has graduated and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 2. Check if student has been dropped
+        if (!empty($academicDetail) && $academicDetail->status == -1) {
+            return redirect()->back()->with('error', 'This student has been dropped and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 3. Validate academic details exist
+        if (empty($academicDetail)) {
+            return redirect()->back()->with('error', 'Academic details for this student could not be found.')->withInput();
+        }
+
+        // 4. Validate student_academic_details.batch is not null/empty
+        if (empty($academicDetail->batch)) {
+            return redirect()->back()->with('error', 'This student does not have an assigned academic batch and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 5. Validate student_academic_details.is_batch_miss = 0 (not a batch-miss student)
+        if ($academicDetail->is_batch_miss != 0) {
+            return redirect()->back()->with('error', 'This student is classified as batch-missing and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 6. Validate student_academic_details.status = 1 (Enrolled)
+        if ($academicDetail->status != 1) {
+            return redirect()->back()->with('error', 'This student is not currently enrolled and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 7. Validate student_personal_details.status = 1 (active account)
+        if ($studentPersonal->status != 1) {
+            return redirect()->back()->with('error', 'This student account is inactive or deactivated and is not eligible for a studentship letter.')->withInput();
+        }
+
         $student = Student::join('student_academic_details','student_personal_details.id','=','student_academic_details.student_id')
                         ->join('master_batch','student_academic_details.batch','=','master_batch.id')
                         ->join('master_degree_programs','master_batch.program_id','=','master_degree_programs.id')
@@ -1120,8 +1164,8 @@ class AdminStudentController extends Controller{
                         )
                         ->first();
 
-        if(empty($student)){
-            return redirect()->back()->with('error', 'Student not found with this registration number.');
+        if (empty($student)) {
+            return redirect()->back()->with('error', 'Degree program or batch details could not be found for this student.')->withInput();
         }
 
         $genderTitle = ($student->gender == 1) ? 'Mr.' : 'Ms.';

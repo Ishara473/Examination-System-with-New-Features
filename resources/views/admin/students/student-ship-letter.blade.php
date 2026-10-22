@@ -1,5 +1,7 @@
 @extends('layouts.admin')
 
+@section('hide_alerts', '1')
+
 @section('title')
 Studentship Letter
 @endsection
