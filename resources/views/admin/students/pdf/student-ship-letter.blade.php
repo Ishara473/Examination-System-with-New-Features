@@ -47,7 +47,7 @@
 
         <div style="width:76%; margin:0 auto 110px; text-align:justify; line-height:2.0; font-size:16px; font-family: 'Book Antiqua', serif;">
             <p class="paragraph" style="text-indent:0; margin:0;">
-                This is to certify that {{$student_name}}, Registration Number {{$registration_no}} is an internal student of the Faculty of Agriculture, Rajarata University of Sri Lanka who is following {{$degree_program}} since {{$registration_date}}. The duration of the degree programme is {{$degree_duration}}. Presently, {{$pronoun}} is studying in the 1st Semester of the {{$current_year}} Year.
+                This is to certify that {{$student_name}}, Registration Number {{$registration_no}} is an internal student of the Faculty of Agriculture, Rajarata University of Sri Lanka who is following {{$degree_program}} since {{$registration_date}}. The duration of the degree programme is {{$degree_duration}}. Presently, {{$pronoun}} is studying in the {{$semester}} of the {{$current_year}} Year.
             </p>
             <p class="paragraph" style="text-indent:0; margin-top:30px;">
                 This letter is issued on {{$student_name}}'s request.

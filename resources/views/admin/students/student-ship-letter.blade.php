@@ -25,7 +25,7 @@ Studentship Letter
     <form method="POST" action="{{ url('/admin/student/generate-student-ship-letter') }}">
         @csrf
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <div class="form-group">
                     <label for="registration_no">Registration Number</label>
                     <input type="text" class="form-control" id="registration_no" name="registration_no" placeholder="e.g., AG/2025/111" required value="{{ old('registration_no') }}">
@@ -34,7 +34,19 @@ Studentship Letter
                     @endif
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="semester">Semester</label>
+                    <select class="form-control" id="semester" name="semester" required>
+                        <option value="1st Semester" {{ old('semester', '1st Semester') == '1st Semester' ? 'selected' : '' }}>1st Semester</option>
+                        <option value="2nd Semester" {{ old('semester') == '2nd Semester' ? 'selected' : '' }}>2nd Semester</option>
+                    </select>
+                    @if($errors->has('semester'))
+                        <span class="text-danger">{{ $errors->first('semester') }}</span>
+                    @endif
+                </div>
+            </div>
+            <div class="col-md-3">
                 <div class="form-group">
                     <label for="BtnSubmit" class="d-block">&nbsp;</label>
                     <button type="submit" class="btn btn-primary btn-grey-overlay btn-icon-split" id="BtnSubmit">

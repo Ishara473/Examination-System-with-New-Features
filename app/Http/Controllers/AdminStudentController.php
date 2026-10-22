@@ -1096,10 +1096,16 @@ class AdminStudentController extends Controller{
             abort(403, 'Unauthorized action.');
         }
 
-        $validator = Validator::make($request->all(), ['registration_no' => 'required']);
+        $validator = Validator::make($request->all(), [
+            'registration_no' => 'required',
+            'semester' => 'nullable|string'
+        ]);
         if($validator->fails()){
             return redirect()->back()->withErrors($validator)->withInput();
         }
+
+        $semesterInput = $request->input('semester', '1st Semester');
+        $semester = in_array($semesterInput, ['1st Semester', '2nd Semester']) ? $semesterInput : '1st Semester';
 
         // Validate student exists
         $studentPersonal = Student::where('registration_no', $request->registration_no)->first();
@@ -1192,6 +1198,7 @@ class AdminStudentController extends Controller{
             'registration_date' => $formattedDate,
             'degree_duration' => $degreeDuration,
             'current_year' => $currentYearName,
+            'semester' => $semester,
             'letter_date' => $currentDate,
             'pronoun' => $pronoun,
         ];
