@@ -1170,6 +1170,7 @@ class AdminStudentController extends Controller{
 
         $genderTitle = ($student->gender == 1) ? 'Mr.' : 'Ms.';
         $studentName = $genderTitle . ' ' . $student->initials . ' ' . $student->name_marking;
+        $pronoun = ($student->gender == 1) ? 'he' : 'she';
 
         $degreeName = $student->degree_program;
         $isHonoursDegree = str_contains(strtolower($student->degree_program), 'honours');
@@ -1192,6 +1193,7 @@ class AdminStudentController extends Controller{
             'degree_duration' => $degreeDuration,
             'current_year' => $currentYearName,
             'letter_date' => $currentDate,
+            'pronoun' => $pronoun,
         ];
 
         $pdf = PDF::loadView('admin.students.pdf.student-ship-letter', $data)
