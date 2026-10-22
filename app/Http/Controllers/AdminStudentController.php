@@ -1091,6 +1091,84 @@ class AdminStudentController extends Controller{
         return view('admin.students.student-ship-letter');
     }
 
+    public function search_studentship_letter_students(Request $request){
+        if (!(Auth::user()->hasPermissionTo('student:view') || Auth::user()->hasRole('Admin') )){ 
+            abort(403, 'Unauthorized action.');
+        }
+
+        $q = trim($request->get('q', ''));
+        if (empty($q)) {
+            return response()->json([]);
+        }
+
+        $cleanQ = str_replace(['.', ' ', '/', '-'], '', $q);
+
+        $students = Student::leftJoin('student_academic_details', 'student_personal_details.id', '=', 'student_academic_details.student_id')
+            ->leftJoin('master_batch', 'student_academic_details.batch', '=', 'master_batch.id')
+            ->where(function($query) use ($q, $cleanQ) {
+                $query->where('student_personal_details.registration_no', 'LIKE', "%{$q}%")
+                      ->orWhere('student_personal_details.id_no', 'LIKE', "%{$q}%")
+                      ->orWhere('student_personal_details.full_name', 'LIKE', "%{$q}%")
+                      ->orWhere('student_personal_details.name_marking', 'LIKE', "%{$q}%")
+                      ->orWhere('student_personal_details.initials', 'LIKE', "%{$q}%")
+                      ->orWhere(DB::raw("CONCAT(student_personal_details.initials, ' ', student_personal_details.name_marking)"), 'LIKE', "%{$q}%")
+                      ->orWhere(DB::raw("CONCAT(student_personal_details.name_marking, ' ', student_personal_details.initials)"), 'LIKE', "%{$q}%");
+
+                if (!empty($cleanQ)) {
+                    $query->orWhere(DB::raw("REPLACE(REPLACE(CONCAT(student_personal_details.initials, student_personal_details.name_marking), '.', ''), ' ', '')"), 'LIKE', "%{$cleanQ}%")
+                          ->orWhere(DB::raw("REPLACE(REPLACE(student_personal_details.registration_no, '/', ''), '-', '')"), 'LIKE', "%{$cleanQ}%");
+                }
+            })
+            ->select(
+                'student_personal_details.id',
+                'student_personal_details.registration_no',
+                'student_personal_details.full_name',
+                'student_personal_details.initials',
+                'student_personal_details.name_marking',
+                'student_personal_details.id_no',
+                'student_personal_details.status as personal_status',
+                'student_academic_details.current_study_year',
+                'student_academic_details.status as academic_status',
+                'student_academic_details.is_batch_miss',
+                'master_batch.code as batch_code'
+            )
+            ->take(15)
+            ->get();
+
+        $results = $students->map(function($student) {
+            $name = trim($student->initials . ' ' . $student->name_marking);
+            if (empty($name)) {
+                $name = $student->full_name;
+            }
+
+            $isEligible = ($student->personal_status == 1 && $student->academic_status == 1 && $student->is_batch_miss == 0);
+
+            $statusText = 'Enrolled';
+            if ($student->academic_status == 2 || $student->personal_status == 2) {
+                $statusText = 'Graduated';
+            } elseif ($student->academic_status == -1) {
+                $statusText = 'Dropped';
+            } elseif ($student->is_batch_miss == 1) {
+                $statusText = 'Batch-Miss';
+            } elseif ($student->personal_status != 1) {
+                $statusText = 'Inactive';
+            }
+
+            return [
+                'id' => $student->id,
+                'registration_no' => $student->registration_no,
+                'name' => $name,
+                'id_no' => $student->id_no,
+                'batch' => $student->batch_code ?? 'N/A',
+                'current_year' => $student->current_study_year ? $student->current_study_year . ' Year' : '',
+                'status_text' => $statusText,
+                'is_eligible' => $isEligible
+            ];
+        });
+
+        return response()->json($results);
+    }
+
     public function generate_student_ship_letter(Request $request){
         if (!(Auth::user()->hasPermissionTo('student:view') || Auth::user()->hasRole('Admin') )){ 
             abort(403, 'Unauthorized action.');
