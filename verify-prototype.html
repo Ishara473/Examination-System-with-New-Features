@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transcript Verification — Rajarata University of Sri Lanka</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --rusl-blue:   #1a3a6b;
+      --rusl-gold:   #c8972b;
+      --rusl-light:  #e8f0fb;
+      --valid-green: #0d7a4e;
+      --valid-bg:    #e6f7f1;
+      --invalid-red: #b91c1c;
+      --invalid-bg:  #fef2f2;
+      --text:        #1e293b;
+      --muted:       #64748b;
+      --border:      #cbd5e1;
+    }
+    body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: var(--text); min-height: 100vh; }
+
+    /* ── Dev bar ── */
+    #dev-bar { background:#0f172a; color:#94a3b8; font-size:12px; padding:8px 20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    #dev-bar strong { color:#f1f5f9; }
+    #dev-bar button { background:#1e293b; color:#94a3b8; border:1px solid #334155; border-radius:4px; padding:4px 12px; cursor:pointer; font-size:12px; transition:all .2s; }
+    #dev-bar button.active { background:var(--rusl-blue); color:white; border-color:var(--rusl-blue); }
+    #dev-bar button:hover:not(.active) { background:#334155; color:white; }
+
+    /* ── Header ── */
+    header { background:var(--rusl-blue); color:white; }
+    .header-top { display:flex; align-items:center; gap:18px; padding:18px 40px; }
+    .crest { width:56px; height:56px; background:rgba(255,255,255,0.15); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; border:2px solid rgba(255,255,255,0.3); }
+    .header-text h1 { font-family:'Playfair Display',serif; font-size:17px; font-weight:700; }
+    .header-text p { font-size:12px; color:rgba(255,255,255,0.7); margin-top:2px; }
+    .gold-bar { background:var(--rusl-gold); height:4px; }
+    nav { background:rgba(0,0,0,0.2); padding:10px 40px; font-size:13px; color:rgba(255,255,255,0.75); }
+
+    main { max-width:760px; margin:36px auto 60px; padding:0 20px; }
+
+    /* ── Card ── */
+    .card { background:white; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.08); overflow:hidden; }
+    .card-header { padding:28px 32px 22px; border-bottom:1px solid var(--border); }
+    .card-header h2 { font-family:'Playfair Display',serif; font-size:22px; color:var(--rusl-blue); }
+    .card-header p { color:var(--muted); font-size:14px; margin-top:6px; }
+    .card-body { padding:28px 32px; }
+
+    /* ── Lookup page ── */
+    .form-label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+    .form-hint { font-size:12px; color:var(--muted); margin-bottom:10px; }
+    .input-row { display:flex; gap:10px; }
+    .input-row input { flex:1; padding:12px 16px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+    .input-row input:focus { border-color:var(--rusl-blue); }
+    .btn-primary { background:var(--rusl-blue); color:white; border:none; border-radius:8px; padding:12px 24px; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; transition:background .2s; }
+    .btn-primary:hover { background:#142f5a; }
+    .divider { display:flex; align-items:center; gap:12px; margin:24px 0; color:var(--muted); font-size:13px; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+    .info-box { background:var(--rusl-light); border-left:4px solid var(--rusl-blue); border-radius:0 8px 8px 0; padding:14px 16px; font-size:13px; color:var(--rusl-blue); line-height:1.6; }
+
+    /* ── Result page ── */
+    .status-banner { display:flex; align-items:center; gap:14px; padding:20px 32px; }
+    .status-banner.valid { background:var(--valid-bg); }
+    .status-banner.invalid { background:var(--invalid-bg); }
+    .status-icon { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+    .status-icon.valid { background:var(--valid-green); color:white; }
+    .status-icon.invalid { background:var(--invalid-red); color:white; }
+    .status-text h2 { font-size:17px; font-weight:700; }
+    .status-text h2.valid { color:var(--valid-green); }
+    .status-text h2.invalid { color:var(--invalid-red); }
+    .status-text p { font-size:13px; margin-top:3px; color:var(--muted); }
+
+    .doc-meta { display:flex; gap:24px; background:#f8fafc; border-bottom:1px solid var(--border); padding:14px 32px; font-size:13px; flex-wrap:wrap; }
+    .doc-meta div { display:flex; flex-direction:column; gap:2px; }
+    .doc-meta .lbl { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+    .doc-meta .val { font-weight:600; }
+
+    .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--rusl-blue); border-bottom:2px solid var(--rusl-light); padding-bottom:8px; margin-bottom:16px; }
+
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:28px; }
+    .info-item { display:flex; flex-direction:column; gap:3px; }
+    .info-item .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+    .info-item .val { font-size:14px; font-weight:600; }
+    .info-item .val.big { color:var(--rusl-blue); font-size:16px; }
+    .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700; background:#fef3c7; color:#92400e; }
+
+    .notice-box { background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:18px 20px; margin-bottom:20px; font-size:13px; color:#92400e; line-height:1.7; }
+    .notice-box h4 { font-size:13px; font-weight:700; margin-bottom:8px; }
+
+    .cta-box { background:linear-gradient(135deg,#1a3a6b 0%,#2a5298 100%); border-radius:10px; padding:22px 24px; color:white; }
+    .cta-box h4 { font-size:15px; font-weight:700; margin-bottom:6px; }
+    .cta-box p { font-size:13px; color:rgba(255,255,255,0.8); line-height:1.6; margin-bottom:16px; }
+    .cta-buttons { display:flex; gap:10px; flex-wrap:wrap; }
+    .btn-gold { background:var(--rusl-gold); color:white; border:none; border-radius:7px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; transition:background .2s; }
+    .btn-gold:hover { background:#b07e20; }
+    .btn-ghost { background:transparent; color:white; border:1.5px solid rgba(255,255,255,0.5); border-radius:7px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; }
+    .btn-ghost:hover { background:rgba(255,255,255,0.1); }
+
+    /* ── Invalid page ── */
+    .invalid-list { list-style:none; margin:14px 0 20px; }
+    .invalid-list li { display:flex; align-items:flex-start; gap:8px; font-size:13.5px; padding:6px 0; }
+    .invalid-list li::before { content:'•'; color:var(--invalid-red); font-weight:900; flex-shrink:0; }
+    .contact-box { background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:18px 20px; font-size:13px; }
+    .contact-box h4 { font-weight:700; margin-bottom:10px; color:var(--rusl-blue); }
+    .contact-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+
+    .audit-note { text-align:center; color:var(--muted); font-size:12px; margin-top:20px; padding:12px; background:#f8fafc; border-radius:8px; }
+
+    /* ── Application Form page ── */
+    .form-page { background:white; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.08); overflow:hidden; }
+    .form-page-header { background:var(--rusl-blue); color:white; padding:22px 32px; display:flex; align-items:center; gap:16px; }
+    .form-page-header .form-crest { width:48px; height:48px; background:rgba(255,255,255,0.15); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; border:2px solid rgba(255,255,255,0.3); flex-shrink:0; }
+    .form-page-header .form-title h2 { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; }
+    .form-page-header .form-title p { font-size:12px; color:rgba(255,255,255,0.7); margin-top:3px; }
+    .form-gold-bar { background:var(--rusl-gold); height:3px; }
+
+    .form-section { padding:20px 32px; border-bottom:1px solid var(--border); }
+    .form-section-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:white; background:var(--rusl-blue); padding:7px 14px; border-radius:5px; display:inline-block; margin-bottom:16px; }
+    .form-section-title.prefilled { background:var(--valid-green); }
+    .form-section-title.blank { background:#64748b; }
+    .form-section-title.payment { background:var(--rusl-gold); }
+
+    .prefilled-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .prefilled-item { display:flex; flex-direction:column; gap:3px; }
+    .prefilled-item .f-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+    .prefilled-item .f-val { font-size:13px; font-weight:600; padding:8px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; color:var(--text); }
+    .prefilled-item.full { grid-column: 1 / -1; }
+
+    .blank-field { margin-bottom:14px; }
+    .blank-field label { display:block; font-size:12px; font-weight:600; margin-bottom:5px; color:var(--text); }
+    .blank-field .field-line { border:none; border-bottom:1.5px solid #94a3b8; width:100%; padding:6px 2px; font-size:13px; background:transparent; display:block; }
+
+    .payment-box { background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:16px 18px; font-size:13px; color:#78350f; line-height:1.8; }
+    .payment-box strong { color:#92400e; }
+    .payment-box .bank-detail { display:flex; gap:8px; align-items:baseline; margin-top:4px; }
+    .payment-box .bank-label { font-size:11px; color:#a16207; min-width:110px; text-transform:uppercase; letter-spacing:.3px; }
+    .payment-box .bank-val { font-weight:600; }
+
+    .form-footer-note { padding:16px 32px; background:#f8fafc; font-size:12px; color:var(--muted); line-height:1.7; text-align:center; }
+
+    .back-btn { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--rusl-blue); background:var(--rusl-light); border:none; border-radius:7px; padding:9px 18px; cursor:pointer; margin-bottom:18px; transition:background .2s; }
+    .back-btn:hover { background:#d0e0f7; }
+
+    /* ── Footer ── */
+    footer { text-align:center; padding:20px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); background:white; margin-top:40px; }
+    footer a { color:var(--rusl-blue); }
+
+    .page { display:none; }
+    .page.active { display:block; }
+
+    @media (max-width:600px) {
+      .header-top { padding:14px 16px; }
+      nav { padding:8px 16px; }
+      main { margin:20px auto 40px; padding:0 12px; }
+      .card-header, .card-body { padding:20px 16px; }
+      .status-banner { padding:16px; }
+      .doc-meta { padding:12px 16px; }
+      .info-grid, .prefilled-grid { grid-template-columns:1fr; }
+      .input-row { flex-direction:column; }
+      .form-section { padding:16px 16px; }
+      .form-page-header { padding:16px; }
+      .form-footer-note { padding:14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Developer scenario switcher bar -->
+<div id="dev-bar">
+  <strong>PROTOTYPE DEMO:</strong>
+  <button class="active" onclick="showPage('lookup',this)">1. Lookup Page</button>
+  <button onclick="showPage('valid',this)">2. Valid Result</button>
+  <button onclick="showPage('invalid',this)">3. Invalid / Not Found</button>
+  <button onclick="showPage('appform',this)">4. Application Form</button>
+</div>
+
+<header>
+  <div class="header-top">
+    <div class="crest">&#127891;</div>
+    <div class="header-text">
+      <h1>Rajarata University of Sri Lanka</h1>
+      <p>Faculty of Agriculture &mdash; Online Transcript Verification System</p>
+    </div>
+  </div>
+  <div class="gold-bar"></div>
+  <nav>Home &rsaquo; Transcript Verification</nav>
+</header>
+
+<main>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PAGE 1: LOOKUP                          -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="page-lookup" class="page active">
+    <div class="card">
+      <div class="card-header">
+        <h2>Transcript Verification</h2>
+        <p>Verify the authenticity of an academic transcript issued by the Faculty of Agriculture, RUSL.</p>
+      </div>
+      <div class="card-body">
+        <label class="form-label">Enter Document ID</label>
+        <p class="form-hint">The Document ID is printed at the top-right corner of the transcript &mdash; e.g. RUSL/FOA/2026/TR/042</p>
+        <div class="input-row">
+          <input type="text" placeholder="e.g. RUSL/FOA/2026/TR/042" value="RUSL/FOA/2026/TR/042" />
+          <button class="btn-primary" onclick="showPage('valid',null); setDevBarActive(1)">Verify</button>
+        </div>
+        <div class="divider">OR</div>
+        <div class="info-box">
+          &#128241; <strong>Scan via QR Code</strong> &mdash; Point your phone camera at the QR code printed on the physical transcript. It will open the verification result page automatically — no typing needed.
+        </div>
+        <div style="margin-top:20px;padding:14px 16px;background:#f8fafc;border-radius:8px;font-size:13px;color:var(--muted);line-height:1.6;">
+          <strong style="color:var(--text);">What this service provides:</strong><br>
+          This online verification confirms the <strong>authenticity and final award status</strong> of official transcripts only.
+          Individual course-by-course grades are <strong>not displayed online</strong>.
+          For certified detailed reports, please contact the Examinations Division.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PAGE 2: VALID RESULT                    -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="page-valid" class="page">
+    <div class="card">
+      <div class="status-banner valid">
+        <div class="status-icon valid">&#10004;</div>
+        <div class="status-text">
+          <h2 class="valid">VALID &mdash; Officially Issued Transcript</h2>
+          <p>Verified against the Senate-approved records of Rajarata University of Sri Lanka.</p>
+        </div>
+      </div>
+      <div class="doc-meta">
+        <div><span class="lbl">Document ID</span><span class="val">RUSL/FOA/2026/TR/042</span></div>
+        <div><span class="lbl">Date Issued</span><span class="val">01 October 2026</span></div>
+        <div><span class="lbl">Verified At</span><span class="val" id="verify-time"></span></div>
+        <div><span class="lbl">Status</span><span class="val" style="color:var(--valid-green);">&#9679; Active</span></div>
+      </div>
+      <div class="card-body">
+
+        <div class="section-title">Candidate Information</div>
+        <div class="info-grid">
+          <div class="info-item" style="grid-column:1 / -1;">
+            <span class="lbl">Full Name (as per Senate Registry)</span>
+            <span class="val">Perera Pathiraja Mudiyanselage Kasun Dilshan Perera</span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">Registration Number</span>
+            <span class="val">AG/2018/126</span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">Index Number</span>
+            <span class="val">AG/18/126</span>
+          </div>
+        </div>
+
+        <div class="section-title">Award &amp; Academic Standing</div>
+        <div class="info-grid">
+          <div class="info-item" style="grid-column:1 / -1;">
+            <span class="lbl">Degree Awarded</span>
+            <span class="val">Bachelor of Science Honours in Agriculture <span style="color:var(--muted);font-weight:400;">[BSc Hons (Agri)]</span></span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">SLQF Level</span>
+            <span class="val">Level 6 &mdash; Four Academic Years</span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">Effective Date of Degree</span>
+            <span class="val">01 October 2026</span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">Overall Final GPA (FGPA)</span>
+            <span class="val big">3.72 / 4.00</span>
+          </div>
+          <div class="info-item">
+            <span class="lbl">Final Classification</span>
+            <span class="val"><span class="badge">First Class Honours</span></span>
+          </div>
+        </div>
+
+        <div class="notice-box">
+          <h4>&#128274; Official Data Restriction Notice</h4>
+          This service confirms <strong>authenticity and final award status only</strong>.
+          Individual course results, semester GPAs, and credit breakdowns are
+          <strong>not published online</strong> as they form part of the university's confidential academic records.<br><br>
+          For certified detailed verification (e.g. WES evaluations, foreign licensing boards, embassy submissions),
+          please apply through our <strong>Formal Verification Service</strong>.
+        </div>
+
+        <div class="cta-box">
+          <h4>Need a Detailed Certified Verification Report?</h4>
+          <p>For professional licensing boards, immigration authorities (WES, IQAS), or postgraduate admission purposes, our Examinations Division provides an official certified verification letter with full course breakdown. Processing time: 5&ndash;10 working days.</p>
+          <div class="cta-buttons">
+            <button class="btn-gold" onclick="showPage('appform',null); setDevBarActive(3)">&#128196; Download Application Form</button>
+            <button class="btn-ghost">&#9742; Contact Examinations Division</button>
+          </div>
+        </div>
+
+        <div class="audit-note">
+          This verification has been logged for security and audit purposes. &nbsp;|&nbsp; sar@agri.rjt.ac.lk &nbsp;|&nbsp; +94 25 222 1613
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PAGE 3: INVALID / NOT FOUND             -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="page-invalid" class="page">
+    <div class="card">
+      <div class="status-banner invalid">
+        <div class="status-icon invalid">&#10008;</div>
+        <div class="status-text">
+          <h2 class="invalid">VERIFICATION FAILED &mdash; Document Not Found</h2>
+          <p>The Document ID or QR code does not match any officially issued transcript in our records.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="background:var(--invalid-bg);border:1px solid #fecaca;border-radius:10px;padding:18px 20px;margin-bottom:24px;">
+          <p style="font-size:14px;font-weight:600;color:var(--invalid-red);margin-bottom:8px;">
+            Document ID checked: <code style="background:#fee2e2;padding:2px 8px;border-radius:4px;">RUSL/FOA/2026/TR/999</code>
+          </p>
+          <p style="font-size:13px;color:#7f1d1d;line-height:1.6;">
+            No matching record was found in the official Rajarata University of Sri Lanka transcript registry.
+          </p>
+        </div>
+
+        <div class="section-title">This may indicate one of the following</div>
+        <ul class="invalid-list">
+          <li>The document has been <strong>altered or is fraudulent</strong></li>
+          <li>The QR code was <strong>damaged or incorrectly scanned</strong> &mdash; please try again</li>
+          <li>The Document ID was <strong>typed incorrectly</strong> &mdash; please check and retry</li>
+          <li>The transcript was <strong>not issued by this institution</strong></li>
+          <li>The transcript may have been <strong>revoked or superseded</strong> by a corrected copy</li>
+        </ul>
+
+        <div class="contact-box">
+          <h4>Report a Suspected Fraudulent Document</h4>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+            If you believe a fraudulent academic document is in circulation, please contact us immediately.
+          </p>
+          <div class="contact-row">&#128100; Senior Assistant Registrar (Examinations)</div>
+          <div class="contact-row">&#128231; sar@agri.rjt.ac.lk</div>
+          <div class="contact-row">&#128222; +94 25 222 1613</div>
+          <div class="contact-row">&#128336; Monday &ndash; Friday, 8:30 AM &ndash; 4:30 PM</div>
+        </div>
+
+        <div style="margin-top:20px;text-align:center;">
+          <button class="btn-primary" onclick="showPage('lookup',null); setDevBarActive(0)" style="padding:12px 32px;">
+            &#8592; Try Again with a Different Document ID
+          </button>
+        </div>
+
+        <div class="audit-note" style="margin-top:16px;">
+          This failed verification attempt has been logged. &nbsp;|&nbsp; Faculty of Agriculture, RUSL
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PAGE 4: APPLICATION FORM PREVIEW        -->
+  <!-- ═══════════════════════════════════════ -->
+  <div id="page-appform" class="page">
+
+    <button class="back-btn" onclick="showPage('valid',null); setDevBarActive(1)">
+      &#8592; Back to Verification Result
+    </button>
+
+    <div class="form-page">
+
+      <!-- Form header mimicking university letterhead -->
+      <div class="form-page-header">
+        <div class="form-crest">&#127891;</div>
+        <div class="form-title">
+          <h2>Rajarata University of Sri Lanka</h2>
+          <p>Faculty of Agriculture &nbsp;&middot;&nbsp; Examinations Division &nbsp;&middot;&nbsp; Puliyankulama, Anuradhapura</p>
+        </div>
+      </div>
+      <div class="form-gold-bar"></div>
+
+      <div style="text-align:center; padding:18px 32px 10px; border-bottom:1px solid var(--border);">
+        <div style="font-size:15px; font-weight:700; color:var(--rusl-blue); letter-spacing:.5px;">FORMAL TRANSCRIPT VERIFICATION REQUEST</div>
+        <div style="font-size:12px; color:var(--muted); margin-top:4px;">For official use by employers, licensing boards, embassies, and academic institutions</div>
+      </div>
+
+      <!-- SECTION A: Pre-filled by system -->
+      <div class="form-section">
+        <div class="form-section-title prefilled">&#10003; Section A &mdash; Student Details (Pre-filled by System)</div>
+        <div style="font-size:12px;color:var(--valid-green);margin-bottom:14px;">
+          &#128274; These details have been automatically populated from the verified university database. Do not alter.
+        </div>
+        <div class="prefilled-grid">
+          <div class="prefilled-item full">
+            <span class="f-lbl">Full Name (as per Senate Registry)</span>
+            <span class="f-val">Perera Pathiraja Mudiyanselage Kasun Dilshan Perera</span>
+          </div>
+          <div class="prefilled-item">
+            <span class="f-lbl">Registration Number</span>
+            <span class="f-val">AG/2018/126</span>
+          </div>
+          <div class="prefilled-item">
+            <span class="f-lbl">Index Number</span>
+            <span class="f-val">AG/18/126</span>
+          </div>
+          <div class="prefilled-item">
+            <span class="f-lbl">Document ID</span>
+            <span class="f-val">RUSL/FOA/2026/TR/042</span>
+          </div>
+          <div class="prefilled-item">
+            <span class="f-lbl">Degree</span>
+            <span class="f-val">BSc Hons in Agriculture</span>
+          </div>
+          <div class="prefilled-item">
+            <span class="f-lbl">Final GPA</span>
+            <span class="f-val">3.72 / 4.00</span>
+          </div>
+          <div class="prefilled-item">
+            <span class="f-lbl">Classification</span>
+            <span class="f-val">First Class Honours</span>
+          </div>
+          <div class="prefilled-item">
+            <span class="f-lbl">Effective Date of Degree</span>
+            <span class="f-val">01 October 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION B: To be filled by employer -->
+      <div class="form-section">
+        <div class="form-section-title blank">&#9998; Section B &mdash; Requester Details (To Be Filled by Applicant)</div>
+        <div class="blank-field">
+          <label>Full Name of Requester</label>
+          <div class="field-line">&nbsp;</div>
+        </div>
+        <div class="blank-field">
+          <label>Organization / Institution</label>
+          <div class="field-line">&nbsp;</div>
+        </div>
+        <div class="blank-field">
+          <label>Purpose of Verification</label>
+          <div class="field-line">&nbsp;</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="blank-field">
+            <label>Contact Number</label>
+            <div class="field-line">&nbsp;</div>
+          </div>
+          <div class="blank-field">
+            <label>Email Address</label>
+            <div class="field-line">&nbsp;</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">
+          <div class="blank-field">
+            <label>Signature</label>
+            <div class="field-line" style="height:36px;">&nbsp;</div>
+          </div>
+          <div class="blank-field">
+            <label>Date</label>
+            <div class="field-line">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION C: Payment -->
+      <div class="form-section">
+        <div class="form-section-title payment">&#128176; Section C &mdash; Payment &amp; Submission Instructions</div>
+        <div class="payment-box">
+          <strong>Service Fee:</strong> LKR XXXX (per transcript verification letter)<br><br>
+          <strong>Payment Method &mdash; Bank Deposit:</strong>
+          <div class="bank-detail"><span class="bank-label">Bank</span><span class="bank-val">Bank of Ceylon</span></div>
+          <div class="bank-detail"><span class="bank-label">Branch</span><span class="bank-val">Anuradhapura</span></div>
+          <div class="bank-detail"><span class="bank-label">Account Name</span><span class="bank-val">Rajarata University of Sri Lanka</span></div>
+          <div class="bank-detail"><span class="bank-label">Account No</span><span class="bank-val">XXXX XXXX XXXX</span></div>
+          <br>
+          <strong>&#9888; Please attach the bank deposit slip</strong> when submitting this form.<br><br>
+          <strong>Submit to:</strong><br>
+          Senior Assistant Registrar (Examinations)<br>
+          Faculty of Agriculture, Rajarata University of Sri Lanka<br>
+          &#128231; sar@agri.rjt.ac.lk &nbsp;&nbsp; &#128336; Mon–Fri, 8:30 AM – 4:30 PM<br>
+          <br>
+          <strong>Email Subject:</strong> Transcript Verification Request – AG/2018/126
+        </div>
+      </div>
+
+      <div class="form-footer-note">
+        This form was generated on <span id="form-date"></span> via the RUSL Online Transcript Verification System.
+        Document ID: RUSL/FOA/2026/TR/042 &nbsp;|&nbsp; For office use only: Reference No. _______________
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  &copy; 2026 Faculty of Agriculture, Rajarata University of Sri Lanka &nbsp;&middot;&nbsp;
+  Online Transcript Verification System &nbsp;&middot;&nbsp;
+  <a href="mailto:sar@agri.rjt.ac.lk">sar@agri.rjt.ac.lk</a>
+</footer>
+
+<script>
+  // Set live timestamp on valid result page
+  var now = new Date();
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var timeStr = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear()
+    + ' — ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ' IST';
+  document.getElementById('verify-time').textContent = timeStr;
+
+  var dateStr = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  document.getElementById('form-date').textContent = dateStr;
+
+  function showPage(name, btn) {
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    document.getElementById('page-' + name).classList.add('active');
+    if (btn) {
+      document.querySelectorAll('#dev-bar button').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setDevBarActive(index) {
+    var btns = document.querySelectorAll('#dev-bar button');
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    if (btns[index]) btns[index].classList.add('active');
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>System Documentation — Online Transcript Verification & Formal Request Workflow</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      font-size: 10.5pt;
+      line-height: 1.55;
+    }
+
+    /* Print & Page Break Controls */
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+      padding-top: 10px;
+    }
+    .avoid-break {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Cover Page */
+    .cover {
+      height: 100%;
+      min-height: 250mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid #1a3a6b;
+      padding: 35mm 25mm 25mm 25mm;
+      position: relative;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+    .cover-top {
+      border-top: 5px solid #c8972b;
+      padding-top: 25px;
+    }
+    .cover-badge {
+      display: inline-block;
+      background: #e8f0fb;
+      color: #1a3a6b;
+      font-size: 9pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 6px 14px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .cover h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26pt;
+      color: #1a3a6b;
+      line-height: 1.25;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+    .cover h2 {
+      font-size: 13pt;
+      color: #475569;
+      font-weight: 400;
+      line-height: 1.5;
+      margin-bottom: 30px;
+    }
+    .gold-divider {
+      width: 70px;
+      height: 4px;
+      background: #c8972b;
+      margin-bottom: 30px;
+    }
+    .cover-meta {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid #1a3a6b;
+      padding: 16px 20px;
+      border-radius: 4px;
+      font-size: 9.5pt;
+    }
+    .cover-meta table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .cover-meta td {
+      padding: 4px 6px;
+    }
+    .cover-meta td.label {
+      color: #64748b;
+      font-weight: 600;
+      width: 140px;
+      text-transform: uppercase;
+      font-size: 8.5pt;
+      letter-spacing: 0.5px;
+    }
+    .cover-meta td.val {
+      color: #0f172a;
+      font-weight: 600;
+    }
+    .cover-footer {
+      border-top: 1px solid #cbd5e1;
+      padding-top: 15px;
+      font-size: 8.5pt;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Content Typography */
+    h2.section-header {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 15pt;
+      color: #1a3a6b;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 24px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2.section-header .sec-num {
+      background: #1a3a6b;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-size: 9pt;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    h3.sub-header {
+      font-size: 11.5pt;
+      color: #0f172a;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    p {
+      margin-bottom: 10px;
+      color: #334155;
+      text-align: justify;
+    }
+
+    /* Modern Table */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 18px 0;
+      font-size: 9pt;
+    }
+    table.data-table th {
+      background: #1a3a6b;
+      color: #ffffff;
+      text-align: left;
+      padding: 8px 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 8pt;
+      letter-spacing: 0.5px;
+    }
+    table.data-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #1e293b;
+      vertical-align: top;
+    }
+    table.data-table tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    /* Callout & Alert Boxes */
+    .callout {
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 12px 0 16px 0;
+      font-size: 9.5pt;
+      line-height: 1.5;
+    }
+    .callout-info {
+      background: #f0f7ff;
+      border-left: 4px solid #1a3a6b;
+      color: #1e3a8a;
+    }
+    .callout-warning {
+      background: #fffbeb;
+      border-left: 4px solid #c8972b;
+      color: #92400e;
+    }
+    .callout-success {
+      background: #f0fdf4;
+      border-left: 4px solid #15803d;
+      color: #166534;
+    }
+    .callout-danger {
+      background: #fef2f2;
+      border-left: 4px solid #b91c1c;
+      color: #991b1b;
+    }
+    .callout strong {
+      display: block;
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+
+    /* Workflow Cards */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .flow-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 12px 14px;
+      background: #ffffff;
+    }
+    .flow-card .num {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      background: #c8972b;
+      color: #ffffff;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 22px;
+      font-size: 8.5pt;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .flow-card h4 {
+      font-size: 10pt;
+      color: #1a3a6b;
+      margin-bottom: 4px;
+    }
+    .flow-card p {
+      font-size: 8.5pt;
+      color: #475569;
+      margin-bottom: 0;
+      line-height: 1.45;
+    }
+
+    /* Key-Value Specs */
+    .spec-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 12px 0 16px 0;
+    }
+    .spec-box-header {
+      background: #f1f5f9;
+      font-weight: 700;
+      font-size: 9pt;
+      padding: 8px 14px;
+      color: #1e293b;
+      border-bottom: 1px solid #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #ffffff;
+    }
+    .spec-item {
+      padding: 8px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      border-right: 1px solid #f1f5f9;
+    }
+    .spec-item .k {
+      font-size: 8pt;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
+    .spec-item .v {
+      font-size: 9pt;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 12px;
+      font-size: 7.5pt;
+      font-weight: 700;
+    }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-gold { background: #fef3c7; color: #92400e; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+
+    ul.bullet-list {
+      margin-left: 18px;
+      margin-bottom: 12px;
+    }
+    ul.bullet-list li {
+      margin-bottom: 5px;
+      color: #334155;
+      font-size: 9.5pt;
+    }
+
+    /* Running header/footer */
+    .running-header {
+      font-size: 8pt;
+      color: #94a3b8;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 4px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .running-footer {
+      font-size: 8pt;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 6px;
+      margin-top: 24px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- COVER PAGE                                                          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="cover">
+    <div class="cover-top">
+      <div class="cover-badge">System Concept &amp; Prototype Delivery Document</div>
+      <h1>Online Academic Transcript Verification System &amp; Formal Verification Workflow</h1>
+      <h2>Secure Digital Verification, Anti-Fraud Architecture, and Controlled Document Access Protocol</h2>
+      <div class="gold-divider"></div>
+
+      <div class="cover-meta">
+        <table>
+          <tr>
+            <td class="label">Client Institution:</td>
+            <td class="val">Faculty of Agriculture, Rajarata University of Sri Lanka (RUSL)</td>
+          </tr>
+          <tr>
+            <td class="label">Project Title:</td>
+            <td class="val">Examination System with New Features — Online Transcript Verification</td>
+          </tr>
+          <tr>
+            <td class="label">Document Purpose:</td>
+            <td class="val">Client Presentation, Stakeholder Review &amp; Prototype Guide</td>
+          </tr>
+          <tr>
+            <td class="label">Prototype File:</td>
+            <td class="val"><code>verify-prototype.html</code> (Stand-alone Interactive UI Demo)</td>
+          </tr>
+          <tr>
+            <td class="label">Version &amp; Date:</td>
+            <td class="val">Version 1.0 &nbsp;&middot;&nbsp; October 2026</td>
+          </tr>
+          <tr>
+            <td class="label">Status:</td>
+            <td class="val"><span class="badge badge-green">Ready for Client Review &amp; Acceptance</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <span>Rajarata University of Sri Lanka &mdash; Puliyankulama, Anuradhapura</span>
+      <span>Confidential &amp; Proprietary</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- PAGE 1: EXECUTIVE SUMMARY & ARCHITECTURAL FOUNDATION                -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="page-break">
+    <div class="running-header">
+      <span>Rajarata University of Sri Lanka &middot; Faculty of Agriculture</span>
+      <span>Transcript Verification System Documentation</span>
+    </div>
+
+    <h2 class="section-header">
+      <span class="sec-num">01</span>
+      Executive Summary &amp; Business Objectives
+    </h2>
+
+    <p>
+      Academic institutions globally face an escalating challenge with fraudulent, tampered, or forged degree certificates and academic transcripts. Employers, foreign credential evaluation agencies (such as WES, IQAS, and ECCTIS), foreign licensing boards, and postgraduate admission offices require immediate, indisputable evidence of document authenticity.
+    </p>
+    <p>
+      This system introduces a state-of-the-art <strong>dual-tier verification architecture</strong> tailored specifically for the <strong>Faculty of Agriculture, Rajarata University of Sri Lanka</strong>:
+    </p>
+
+    <div class="flow-grid">
+      <div class="flow-card">
+        <span class="num">1</span>
+        <h4>Tier 1: Instant Online Verification (Public)</h4>
+        <p>Enables anyone with the physical document or QR code to verify instantly whether the transcript is authentic, confirming the candidate's identity, conferred degree, effective graduation date, and Senate-approved GPA / Honours Classification.</p>
+      </div>
+      <div class="flow-card">
+        <span class="num">2</span>
+        <h4>Tier 2: Formal Verification Service (Restricted)</h4>
+        <p>Protects confidential course-by-course module grades from public exposure while giving employers an expedited workflow to request an official, certified sealed verification report directly from the Senior Assistant Registrar (Examinations).</p>
+      </div>
+    </div>
+
+    <h2 class="section-header">
+      <span class="sec-num">02</span>
+      Core Verification Mechanism &amp; Token Architecture
+    </h2>
+
+    <p>
+      A common security concern when building verification portals is: <em>"How does the system ensure that a token genuinely belongs to a specific student and transcript, rather than being forged or swapped?"</em>
+    </p>
+
+    <h3 class="sub-header">A. Document ID vs. Cryptographic Verification Token</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Identifier</th>
+          <th>Format Example</th>
+          <th>Role &amp; Visibility</th>
+          <th>Security Mechanism</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Document ID</strong></td>
+          <td><code>RUSL/FOA/2026/TR/042</code></td>
+          <td>Human-readable; printed on the transcript top-right corner. Used for manual typing.</td>
+          <td>Unique composite key generated sequentially per faculty, year, and transcript registry.</td>
+        </tr>
+        <tr>
+          <td><strong>Verification Token</strong></td>
+          <td><code>e7f1a94b802c6...</code> (64-char SHA-256)</td>
+          <td>Embedded invisibly inside the QR code URL. Never typed manually by users.</td>
+          <td>Cryptographic hash of <code>(Document_ID + Student_RegNo + Issued_Timestamp + Secret_Salt)</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Student ID</strong></td>
+          <td><code>AG/2018/126</code></td>
+          <td>The student's permanent registration number in the Senate registry.</td>
+          <td>Bound to the Document ID and Token at generation time; immutable once issued.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-info">
+      <strong>Bidirectional Integrity Check:</strong>
+      When a user accesses the verification page (whether via QR code or manual input), the system performs a triple-validation:
+      <ol style="margin-left: 18px; margin-top: 4px;">
+        <li>Does the Document ID exist in the transcript registry table?</li>
+        <li>Does the token provided in the QR code exactly match the token stored in the database for that specific Document ID?</li>
+        <li>Is the associated student record active and approved by the Faculty Senate?</li>
+      </ol>
+      Only if all three checks pass does the system retrieve and display the verified result.
+    </div>
+
+    <div class="running-footer">
+      <span>Section 1 &ndash; 2 &middot; Executive Summary &amp; Architecture</span>
+      <span>Page 1</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- PAGE 2: USER EXPERIENCE & PROTOTYPE WALKTHROUGH                     -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="page-break">
+    <div class="running-header">
+      <span>Rajarata University of Sri Lanka &middot; Faculty of Agriculture</span>
+      <span>Transcript Verification System Documentation</span>
+    </div>
+
+    <h2 class="section-header">
+      <span class="sec-num">03</span>
+      Interactive Prototype &amp; Screen Specifications
+    </h2>
+
+    <p>
+      An interactive stand-alone prototype has been prepared in <code>verify-prototype.html</code>. It requires no installation, database, or internet connection, and allows stakeholders to experience the exact user flow on any modern desktop or mobile browser.
+    </p>
+
+    <h3 class="sub-header">Screen 1 &mdash; Public Lookup Page</h3>
+    <ul class="bullet-list">
+      <li><strong>Entry Point:</strong> Accessible via university portal or by scanning the transcript's QR code.</li>
+      <li><strong>Dual Input Options:</strong> Users can enter the printed <strong>Document ID</strong> manually (e.g. <code>RUSL/FOA/2026/TR/042</code>) or scan the physical QR code with their mobile device camera.</li>
+      <li><strong>Transparency Notice:</strong> Informs the visitor upfront that this service confirms authenticity and award standing, while detailed grade breakdowns require a formal request.</li>
+    </ul>
+
+    <h3 class="sub-header">Screen 2 &mdash; Valid Verification Result</h3>
+    <div class="spec-box">
+      <div class="spec-box-header">Verified Data Fields Displayed Upon Match</div>
+      <div class="spec-grid">
+        <div class="spec-item"><div class="k">Status Banner</div><div class="v"><span class="badge badge-green">VALID &mdash; Officially Issued Transcript</span></div></div>
+        <div class="spec-item"><div class="k">Document Identifier</div><div class="v">RUSL/FOA/2026/TR/042</div></div>
+        <div class="spec-item"><div class="k">Candidate Full Name</div><div class="v">Perera Pathiraja Mudiyanselage Kasun Dilshan Perera</div></div>
+        <div class="spec-item"><div class="k">Student Reg No / Index</div><div class="v">AG/2018/126 &nbsp;&middot;&nbsp; Index: AG/18/126</div></div>
+        <div class="spec-item"><div class="k">Degree Conferred</div><div class="v">BSc Honours in Agriculture (SLQF Level 6)</div></div>
+        <div class="spec-item"><div class="k">Effective Graduation Date</div><div class="v">01 October 2026</div></div>
+        <div class="spec-item"><div class="k">Final GPA (FGPA)</div><div class="v">3.72 / 4.00</div></div>
+        <div class="spec-item"><div class="k">Academic Classification</div><div class="v"><span class="badge badge-gold">First Class Honours</span></div></div>
+      </div>
+    </div>
+
+    <div class="callout callout-warning">
+      <strong>Confidentiality Safeguard:</strong>
+      Notice that course-level module grades (e.g., AG1101: A+, AG2203: B) are purposefully <strong>withheld from the online screen</strong>. This prevents automated scrapers or unauthorized third parties from obtaining student grade profiles without consent.
+    </div>
+
+    <h3 class="sub-header">Screen 3 &mdash; Verification Failed / Invalid Document</h3>
+    <ul class="bullet-list">
+      <li><strong>Visual Warning:</strong> Clear red warning indicator notifying that the Document ID or QR code was not found in the Senate-approved registry.</li>
+      <li><strong>Potential Explanations:</strong> Educates the viewer that the transcript may be fraudulent, altered, superseded, or scanned incorrectly.</li>
+      <li><strong>Direct Fraud Reporting Channel:</strong> Displays the official contact details of the Senior Assistant Registrar (Examinations) &mdash; email: <code>sar@agri.rjt.ac.lk</code>, telephone: <code>+94 25 222 1613</code>.</li>
+      <li><strong>Audit Logging:</strong> All failed verification attempts are logged with IP address and timestamp to detect brute-force attacks.</li>
+    </ul>
+
+    <div class="running-footer">
+      <span>Section 3 &middot; Prototype Screens Walkthrough</span>
+      <span>Page 2</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- PAGE 3: FORMAL VERIFICATION SERVICE & APPLICATION FORM              -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="page-break">
+    <div class="running-header">
+      <span>Rajarata University of Sri Lanka &middot; Faculty of Agriculture</span>
+      <span>Transcript Verification System Documentation</span>
+    </div>
+
+    <h2 class="section-header">
+      <span class="sec-num">04</span>
+      Formal Verification Service &amp; Application Form (Option 2)
+    </h2>
+
+    <p>
+      When an employer, embassy, or evaluation service (e.g., WES) requires an official certified letter with a complete course breakdown, they click the <strong>"Download Application Form"</strong> button on the valid result page. This triggers an automated, standardized application generation workflow.
+    </p>
+
+    <h3 class="sub-header">Application Form Structure (Screen 4 of Prototype)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Section</th>
+          <th>Title &amp; Scope</th>
+          <th>Completed By</th>
+          <th>Contents / Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Section A</strong></td>
+          <td>Student Academic Details</td>
+          <td><span class="badge badge-green">Auto-filled by System</span></td>
+          <td>Full Name, Reg No, Index No, Document ID, Degree, GPA, Class, Effective Date. Locked against tampering.</td>
+        </tr>
+        <tr>
+          <td><strong>Section B</strong></td>
+          <td>Requester Details</td>
+          <td><span class="badge badge-blue">Employer / Applicant</span></td>
+          <td>Requester Name, Organization, Verification Purpose (Employment, WES, Visa), Phone, Email, Signature, Date.</td>
+        </tr>
+        <tr>
+          <td><strong>Section C</strong></td>
+          <td>Payment &amp; Submission</td>
+          <td><span class="badge badge-gold">University Instructions</span></td>
+          <td>Prescribed fee (e.g., LKR 2,500), Bank of Ceylon account details, deposit slip requirement, submission email.</td>
+        </tr>
+        <tr>
+          <td><strong>Footer</strong></td>
+          <td>Office Use Only: Reference No.</td>
+          <td><span class="badge badge-red">Senior Assistant Registrar</span></td>
+          <td>Internal registry tracking number (e.g., <code>RUSL/EXAM/VERIF/2026/089</code>) for university file management.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="section-header">
+      <span class="sec-num">05</span>
+      Deep Dive: The "Reference No. (For Office Use Only)"
+    </h2>
+
+    <p>
+      At the bottom of the generated application form, the following line appears:
+    </p>
+    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; padding:10px 16px; font-family:monospace; font-size:9.5pt; text-align:center; margin:10px 0;">
+      Document ID: RUSL/FOA/2026/TR/042 &nbsp;|&nbsp; <strong>For office use only: Reference No. _______________</strong>
+    </div>
+
+    <p>
+      Stakeholders frequently ask: <em>"What is the difference between the Document ID and the Reference Number?"</em>
+    </p>
+
+    <div class="flow-grid">
+      <div class="flow-card">
+        <h4 style="color:#1a3a6b;">Document ID (The Student's Record)</h4>
+        <p><strong>Identifies the transcript itself.</strong> It was generated when the university printed the student's original transcript and never changes over time.</p>
+      </div>
+      <div class="flow-card">
+        <h4 style="color:#c8972b;">Reference No. (The Transaction File)</h4>
+        <p><strong>Identifies the incoming customer request.</strong> It is assigned by university office staff upon receiving the payment slip to track the processing lifecycle of that specific verification letter.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-header">Lifecycle of the Reference Number in University Operations</h3>
+    <ol style="margin-left: 20px; font-size: 9.5pt; line-height: 1.6; color: #334155;">
+      <li><strong>Applicant Submits:</strong> The employer fills Section B, deposits the fee at Bank of Ceylon, and emails the form and bank slip to <code>sar@agri.rjt.ac.lk</code>.</li>
+      <li><strong>Clerk Assigns Reference No.:</strong> The Examinations Division clerk opens an inward file and enters a reference number (e.g., <code>RUSL/EXAM/VERIF/2026/104</code>) into the university logbook.</li>
+      <li><strong>Accounts Reconciliation:</strong> University finance verifies the bank deposit using this reference number.</li>
+      <li><strong>Issuing the Official Letter:</strong> When the Senior Assistant Registrar signs the final official verification letter, this reference number is printed at the top (<em>"Our Ref: RUSL/EXAM/VERIF/2026/104"</em>).</li>
+      <li><strong>Customer Inquiries:</strong> If the employer calls to inquire about status, both parties refer to this Reference Number for instant tracking.</li>
+    </ol>
+
+    <div class="running-footer">
+      <span>Section 4 &ndash; 5 &middot; Formal Verification &amp; Reference Number</span>
+      <span>Page 3</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- PAGE 4: DATABASE ARCHITECTURE & CLIENT NEXT STEPS                   -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="page-break">
+    <div class="running-header">
+      <span>Rajarata University of Sri Lanka &middot; Faculty of Agriculture</span>
+      <span>Transcript Verification System Documentation</span>
+    </div>
+
+    <h2 class="section-header">
+      <span class="sec-num">06</span>
+      Relational Database Architecture
+    </h2>
+
+    <p>
+      The verification subsystem integrates cleanly with the existing examination database schema without disrupting student records, course units, or semester results:
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Table Name</th>
+          <th>Primary Key</th>
+          <th>Key Fields &amp; Foreign Keys</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>students</code></td>
+          <td><code>id</code></td>
+          <td><code>reg_no</code>, <code>index_no</code>, <code>full_name</code>, <code>degree_id</code></td>
+          <td>Master Senate student registry.</td>
+        </tr>
+        <tr>
+          <td><code>transcripts</code></td>
+          <td><code>id</code></td>
+          <td><code>document_id</code> (Unique), <code>student_id</code>, <code>fgpa</code>, <code>class_id</code>, <code>issued_at</code></td>
+          <td>Official transcript record created upon printing.</td>
+        </tr>
+        <tr>
+          <td><code>transcript_tokens</code></td>
+          <td><code>id</code></td>
+          <td><code>transcript_id</code>, <code>token_hash</code> (Indexed), <code>qr_code_path</code>, <code>status</code></td>
+          <td>Stores the cryptographic hash embedded in the QR code.</td>
+        </tr>
+        <tr>
+          <td><code>verification_requests</code></td>
+          <td><code>id</code></td>
+          <td><code>reference_no</code> (Unique), <code>document_id</code>, <code>requester_org</code>, <code>payment_status</code></td>
+          <td>Logs formal verification applications and payment slips.</td>
+        </tr>
+        <tr>
+          <td><code>verification_audit_logs</code></td>
+          <td><code>id</code></td>
+          <td><code>document_id_searched</code>, <code>ip_address</code>, <code>is_valid</code>, <code>created_at</code></td>
+          <td>Security telemetry tracking lookups and potential fraudulent attempts.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="section-header">
+      <span class="sec-num">07</span>
+      Stakeholder Review &amp; Instructions to Test the Prototype
+    </h2>
+
+    <p>
+      The interactive prototype is delivered as a self-contained, offline-compatible HTML5 package. Follow these simple steps to conduct the review:
+    </p>
+
+    <div class="flow-grid">
+      <div class="flow-card">
+        <span class="num">1</span>
+        <h4>Open Prototype</h4>
+        <p>Double-click <code>verify-prototype.html</code> in any web browser (Chrome, Edge, Firefox, Safari). No server is required.</p>
+      </div>
+      <div class="flow-card">
+        <span class="num">2</span>
+        <h4>Use the Scenario Bar</h4>
+        <p>At the top of the screen, a dark scenario bar lets you jump instantly between: <em>1. Lookup, 2. Valid Result, 3. Invalid Result, 4. Application Form</em>.</p>
+      </div>
+      <div class="flow-card">
+        <span class="num">3</span>
+        <h4>Test Lookup Flow</h4>
+        <p>On Screen 1, click <strong>"Verify"</strong> to see how the valid result screen opens. Click <strong>"Download Application Form"</strong> to inspect the pre-filled PDF layout.</p>
+      </div>
+      <div class="flow-card">
+        <span class="num">4</span>
+        <h4>Provide Feedback</h4>
+        <p>Review the university crest, colors, layout, and copy to confirm alignment with Faculty of Agriculture branding and Senate regulations.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-success" style="margin-top: 18px;">
+      <strong>Summary of Value Delivered:</strong>
+      This implementation protects university reputation against counterfeit credentials, provides immediate peace of mind to legitimate graduates and prospective employers, ensures full compliance with privacy best practices, and establishes an auditable revenue stream for the Examinations Division.
+    </div>
+
+    <div style="margin-top: 35px; border-top: 1px solid #cbd5e1; padding-top: 15px; font-size: 9pt; color: #64748b; text-align: center;">
+      Prepared for the <strong>Faculty of Agriculture, Rajarata University of Sri Lanka</strong><br>
+      For inquiries or modifications, contact the Development &amp; Implementation Team.
+    </div>
+
+    <div class="running-footer">
+      <span>Section 6 &ndash; 7 &middot; Database Architecture &amp; Review Guide</span>
+      <span>Page 4</span>
+    </div>
+  </div>
+
+</body>
+</html>
