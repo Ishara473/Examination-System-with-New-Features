@@ -172,3 +172,13 @@ Route::get('/admin/transcripts/final-transcripts', [AdminTranscriptController::c
 Route::get('/admin/transcripts/final-transcripts-download', [AdminTranscriptController::class, 'print_final_transcripts_download']);
 Route::get('/admin/transcripts/final-detail-certificate', [AdminTranscriptController::class, 'print_final_detail_certificate_view']);
 Route::get('/admin/transcripts/final-detail-certificate-download', [AdminTranscriptController::class, 'print_final_detail_certificate_download']);
+// Transcript CRUD routes
+Route::prefix('transcripts')->group(function () {
+    Route::get('/',            [App\Http\Controllers\TranscriptController::class, 'index'])->name('transcripts.index');
+    Route::get('/create',     [App\Http\Controllers\TranscriptController::class, 'create'])->name('transcripts.create');
+    Route::post('/',           [App\Http\Controllers\TranscriptController::class, 'store'])->name('transcripts.store');
+    Route::get('/{id}',       [App\Http\Controllers\TranscriptController::class, 'show'])->name('transcripts.show');
+    Route::get('/{id}/edit',  [App\Http\Controllers\TranscriptController::class, 'edit'])->name('transcripts.edit');
+    Route::put('/{id}',       [App\Http\Controllers\TranscriptController::class, 'update'])->name('transcripts.update');
+    Route::delete('/{id}',    [App\Http\Controllers\TranscriptController::class, 'destroy'])->name('transcripts.destroy');
+});

@@ -58,5 +58,11 @@ class Transcript extends Model
     {
         return $this->hasOne(\App\TranscriptToken::class, 'transcript_id', 'id')->where('status', 'active')->latestOfMany();
     }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(\App\VerificationAuditLog::class, 'transcript_id', 'id');
+    }
+
 }
 
