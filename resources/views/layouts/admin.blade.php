@@ -121,14 +121,14 @@
        
 
             @if(( Auth::user()->hasPermissionTo('transcript:print') || Auth::user()->hasRole('Admin')))
-            <li class="nav-item {{ Request::is('admin/transcripts*')?'active':'' }}">
-                <a class="nav-link {{ Request::is('admin/transcripts*')?'':'collapsed' }}" aria-expanded="{{ Request::is('admin/transcripts*')?'true':'false' }}" data-toggle="collapse" href="#" data-target="#main-nav-transcripts" ><i data-feather="layers" class="mr-1"></i><span>Transcripts</span></a>
-                <div class="collapse {{ Request::is('admin/transcripts*')?'show':'' }}" id="main-nav-transcripts">
+            <li class="nav-item {{ (Request::is('admin/transcripts*') || Request::is('transcripts*'))?'active':'' }}">
+                <a class="nav-link {{ (Request::is('admin/transcripts*') || Request::is('transcripts*'))?'':'collapsed' }}" aria-expanded="{{ (Request::is('admin/transcripts*') || Request::is('transcripts*'))?'true':'false' }}" data-toggle="collapse" href="#" data-target="#main-nav-transcripts" ><i data-feather="layers" class="mr-1"></i><span>Transcripts</span></a>
+                <div class="collapse {{ (Request::is('admin/transcripts*') || Request::is('transcripts*'))?'show':'' }}" id="main-nav-transcripts">
                     <div class="collapse-inner">
                         <a class="collapse-item" href="{{url('/admin/transcripts/semester-transcripts')}}">Statement of Semester Results</a>
                         <a class="collapse-item" href="{{url('/admin/transcripts/final-transcripts')}}">Final Transcript</a>
                         <a class="collapse-item" href="{{url('/admin/transcripts/final-detail-certificate')}}">Detailed Results Sheet</a>
-
+                        <a class="collapse-item" href="{{ route('transcripts.index') }}">Issued Transcripts</a>
                     </div>
                 </div>
             </li>

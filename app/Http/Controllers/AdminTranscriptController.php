@@ -21,6 +21,7 @@ use App\StudentExamResult;
 use App\CourseGrade;
 use App\Regulation;
 use App\Batch;
+use App\Transcript;
 
 use App\Settings;
 
@@ -289,6 +290,22 @@ class AdminTranscriptController extends Controller
                    'semester_stats' => [],
                    'results' => []
                ];
+
+               // Auto-register in the transcript issuance registry
+               Transcript::updateOrCreate(
+                   ['document_id' => $docId],
+                   [
+                       'student_id'     => $std->id,
+                       'degree_name'    => $std->program,
+                       'fgpa'           => $std->final_gpa,
+                       'class_name'     => $std->class,
+                       'effective_date' => $std->degree_effective_date ?: null,
+                       'status'         => 'active',
+                       'issued_by'      => Auth::id(),
+                       'issued_at'      => Carbon::now(),
+                   ]
+               );
+
                $studentIds[] = $std->id;
             } 
 

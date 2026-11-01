@@ -3,77 +3,54 @@
 namespace App\Http\Controllers;
 
 use App\Transcript;
-use App\TranscriptToken;
-use App\VerificationAuditLog;
 use Illuminate\Http\Request;
 
 class TranscriptController extends Controller
 {
-    // Display a listing of transcripts
     public function index()
     {
-        $transcripts = Transcript::with(['tokens', 'auditLogs'])->paginate(15);
+        $transcripts = Transcript::with(['student', 'tokens'])->paginate(15);
         return view('transcripts.index', compact('transcripts'));
     }
 
-    // Show the form for creating a new transcript
-    public function create()
-    {
-        return view('transcripts.create');
-    }
-
-    // Store a newly created transcript
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'email'      => 'required|email|unique:transcripts,email',
-        ]);
-
-        $transcript = Transcript::create($validated);
-        return redirect()->route('transcripts.show', $transcript->id)
-                         ->with('success', 'Transcript created.');
-    }
-
-    // Display a specific transcript
     public function show($id)
     {
-        $transcript = Transcript::with(['tokens', 'auditLogs'])->findOrFail($id);
+        $transcript = Transcript::with(['student', 'tokens', 'auditLogs'])->findOrFail($id);
         return view('transcripts.show', compact('transcript'));
     }
 
-    // Show the form for editing a transcript
     public function edit($id)
     {
         $transcript = Transcript::findOrFail($id);
         return view('transcripts.edit', compact('transcript'));
     }
 
-    // Update the transcript
     public function update(Request $request, $id)
     {
+        $transcript = Transcript::findOrFail($id);
+
         $validated = $request->validate([
-            'first_name' => 'sometimes|required|string|max:255',
-            'last_name'  => 'sometimes|required|string|max:255',
-            'email'      => 'sometimes|required|email|unique:transcripts,email,' . $id,
+            'document_id' => 'required|string|max:50|unique:transcripts,document_id,' . $id,
+            'student_id'  => 'required|integer',
+            'degree_name' => 'nullable|string|max:255',
+            'fgpa'        => 'nullable|numeric|min:0|max:4',
+            'class_name'  => 'nullable|string|max:100',
+            'effective_date' => 'nullable|date',
+            'status'      => 'required|in:active,revoked,superseded',
+            'status_reason' => 'nullable|string',
+            'issued_at'   => 'nullable|date',
         ]);
 
-        $transcript = Transcript::findOrFail($id);
         $transcript->update($validated);
-
         return redirect()->route('transcripts.show', $transcript->id)
-                         ->with('success', 'Transcript updated.');
+                         ->with('success', 'Transcript updated successfully.');
     }
 
-    // Delete a transcript
     public function destroy($id)
     {
         $transcript = Transcript::findOrFail($id);
         $transcript->delete();
-
         return redirect()->route('transcripts.index')
-                         ->with('info', 'Transcript removed.');
+                         ->with('success', 'Transcript removed.');
     }
 }
-?>
