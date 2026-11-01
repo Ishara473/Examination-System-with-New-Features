@@ -180,3 +180,4 @@ Route::prefix('transcripts')->group(function () {
     Route::put('/{id}',      [App\Http\Controllers\TranscriptController::class, 'update'])->name('transcripts.update');
     Route::delete('/{id}',   [App\Http\Controllers\TranscriptController::class, 'destroy'])->name('transcripts.destroy');
 });
+Route::get('/verify/transcript/{documentId}', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.show');
