@@ -183,4 +183,7 @@ Route::prefix('transcripts')->group(function () {
 // Public transcript verification (no auth required)
 Route::get('/verify', [App\Http\Controllers\VerificationController::class, 'index'])->name('verification.index');
 Route::post('/verify', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.search');
-Route::get('/verify/transcript/{documentId}', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.show')->where('documentId', '.*');
+// QR code on PDF links here → redirects to landing page with document_id pre-filled
+Route::get('/verify/transcript/{documentId}', function ($documentId) {
+    return redirect()->to(url('/verify') . '?doc=' . urlencode($documentId));
+})->name('verification.qr')->where('documentId', '.*');

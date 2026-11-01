@@ -236,7 +236,7 @@
                     id="document_id"
                     name="document_id"
                     placeholder="e.g. RUSL/FOA/2026/TR/138"
-                    value="{{ old('document_id') }}"
+                    value="{{ old('document_id', request('doc')) }}"
                     autofocus
                     required
                 >
