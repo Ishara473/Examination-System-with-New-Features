@@ -9,33 +9,82 @@ use Illuminate\Http\Request;
 class VerificationController extends Controller
 {
     /**
-     * Display a public verification page for a transcript.
-     *
-     * @param string $documentId
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\View\View
+     * Show the public verification landing page with a search form.
+     * No authentication required.
      */
-    public function show($documentId, Request $request)
+    public function index()
     {
-        // Find the transcript by its unique document ID (e.g., RUSL/FOA/2023/TR/15)
+        return view('verification.index');
+    }
+
+    /**
+     * Handle the form submission: look up a document ID and show the result.
+     * Also used directly by QR code links (GET with documentId in URL).
+     *
+     * @param string|null $documentId
+     * @param \Illuminate\Http\Request $request
+     */
+    public function show(Request $request, $documentId = null)
+    {
+        if (!$documentId) {
+            // Form POST — validate both fields
+            $request->validate([
+                'document_id' => 'required|string|max:100',
+                'index_no'    => 'required|string|max:50',
+            ]);
+            $documentId = trim($request->input('document_id'));
+            $indexNo    = trim($request->input('index_no'));
+            $method     = 'manual';
+        } else {
+            // QR code direct link — index_no comes as query string (?index_no=...)
+            $indexNo = trim($request->query('index_no', ''));
+            $method  = 'qr_code';
+        }
+
+        // Look up transcript — must match BOTH document_id AND student's index_no
         $transcript = Transcript::where('document_id', $documentId)
                                  ->with('student')
                                  ->first();
 
-        // Determine validity – a transcript is considered valid only when it exists and its status is "active"
-        $isValid = $transcript && $transcript->status === 'active';
+        // Both fields must match the same record
+        $indexMatches = $transcript
+            && $transcript->student
+            && strtoupper(str_replace(' ', '', $transcript->student->index_no))
+               === strtoupper(str_replace(' ', '', $indexNo));
 
-        // Record the verification attempt for audit purposes
+        $isValid = $transcript
+                   && $indexMatches
+                   && $transcript->status === 'active';
+
+        // Determine failure reason for the audit log
+        if (!$transcript) {
+            $failureReason = 'not_found';
+        } elseif (!$indexMatches) {
+            $failureReason = 'index_no_mismatch';
+        } elseif ($transcript->status !== 'active') {
+            $failureReason = $transcript->status;  // 'revoked' / 'superseded'
+        } else {
+            $failureReason = null;
+        }
+
+        // Log the verification attempt
         VerificationAuditLog::create([
-            'document_id_searched' => $documentId,
-            'registration_no_searched' => $transcript ? $transcript->student->registration_no : null,
-            'verification_method' => 'public_url',
-            'is_valid' => $isValid,
-            'failure_reason' => $isValid ? null : ($transcript ? 'revoked' : 'not_found'),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->header('User-Agent'),
+            'document_id_searched'     => $documentId,
+            'registration_no_searched' => $transcript ? optional($transcript->student)->registration_no : null,
+            'verification_method'      => $method,
+            'is_valid'                 => $isValid,
+            'failure_reason'           => $failureReason,
+            'ip_address'               => $request->ip(),
+            'user_agent'               => $request->header('User-Agent'),
         ]);
 
-        return view('verification.show', compact('transcript', 'isValid'));
+        // If index_no doesn't match, treat it as "not found" to avoid leaking info
+        $resultTranscript = ($transcript && $indexMatches) ? $transcript : null;
+
+        return view('verification.result', [
+            'transcript' => $resultTranscript,
+            'isValid'    => $isValid,
+            'documentId' => $documentId,
+        ]);
     }
 }

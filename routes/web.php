@@ -180,4 +180,7 @@ Route::prefix('transcripts')->group(function () {
     Route::put('/{id}',      [App\Http\Controllers\TranscriptController::class, 'update'])->name('transcripts.update');
     Route::delete('/{id}',   [App\Http\Controllers\TranscriptController::class, 'destroy'])->name('transcripts.destroy');
 });
-Route::get('/verify/transcript/{documentId}', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.show');
+// Public transcript verification (no auth required)
+Route::get('/verify', [App\Http\Controllers\VerificationController::class, 'index'])->name('verification.index');
+Route::post('/verify', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.search');
+Route::get('/verify/transcript/{documentId}', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.show')->where('documentId', '.*');
