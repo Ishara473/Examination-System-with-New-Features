@@ -186,6 +186,9 @@ Route::get('/admin/verification-audit-logs', [VerificationAuditLogController::cl
 // Public transcript verification (no auth required)
 Route::get('/verify', [App\Http\Controllers\VerificationController::class, 'index'])->name('verification.index');
 Route::post('/verify', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.search');
+Route::get('/verify/application-form/{transcript}', [App\Http\Controllers\VerificationController::class, 'downloadApplicationForm'])
+    ->middleware('signed')
+    ->name('verification.application-form');
 // QR code on PDF links here → redirects to landing page with document_id pre-filled
 Route::get('/verify/transcript/{documentId}', function ($documentId) {
     return redirect()->to(url('/verify') . '?doc=' . urlencode($documentId));

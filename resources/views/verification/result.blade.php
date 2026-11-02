@@ -31,7 +31,7 @@
             background: rgba(255,255,255,0.97);
             border-radius: 20px;
             box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-            max-width: 560px;
+            max-width: 760px;
             width: 100%;
             overflow: hidden;
             animation: fadeUp .45s ease;
@@ -48,6 +48,16 @@
             text-align: center;
             border-bottom: 1px solid #f3f0eb;
         }
+
+        .card-header.valid-header {
+            padding: 1.25rem 2rem;
+            text-align: left;
+            background: #e6f7f1;
+            border-bottom: 1px solid #bbf7d0;
+        }
+        .valid-header .status-badge { margin-bottom: .65rem; }
+        .valid-header h1 { font-size: 1.25rem; margin-bottom: .2rem; }
+        .valid-header p.sub { font-size: .82rem; }
 
         .logo-wrap { margin-bottom: 1.2rem; }
         .logo-wrap img { height: 60px; object-fit: contain; }
@@ -81,6 +91,19 @@
 
         /* Card body */
         .card-body { padding: 1.8rem 2.5rem; }
+
+        .doc-meta {
+            display: flex;
+            gap: 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid #cbd5e1;
+            padding: 14px 32px;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+        .doc-meta div { display: flex; flex-direction: column; gap: 2px; }
+        .doc-meta .lbl { color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+        .doc-meta .val { font-weight: 600; }
 
         /* Section label */
         .section-lbl {
@@ -167,6 +190,42 @@
         .stamp-text { font-size: .8rem; color: #166534; line-height: 1.55; }
         .stamp-text strong { display: block; font-weight: 700; color: #14532d; margin-bottom: .1rem; }
 
+        .download-application {
+            margin-top: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .9rem 1rem;
+            border-radius: 10px;
+            background: #7b1113;
+            color: white;
+            text-decoration: none;
+            transition: background .2s, transform .15s;
+        }
+        .download-application:hover { background: #5f0d0f; color: white; transform: translateY(-1px); }
+        .download-application > i { font-size: 1.15rem; }
+        .download-application strong { display: block; font-size: .87rem; }
+        .download-application small { display: block; margin-top: .15rem; color: rgba(255,255,255,.75); font-size: .72rem; }
+        .download-expiry { margin-top: .45rem; color: #9ca3af; font-size: .7rem; text-align: center; }
+
+        .notice-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #92400e;
+            line-height: 1.7;
+        }
+        .notice-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+        .cta-box { background: linear-gradient(135deg, #1a3a6b 0%, #2a5298 100%); border-radius: 10px; padding: 22px 24px; color: white; }
+        .cta-box h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+        .cta-box p { font-size: 13px; color: rgba(255,255,255,.8); line-height: 1.6; margin-bottom: 16px; }
+        .cta-box .download-application { display: inline-flex; margin-top: 0; background: #c8972b; color: white; }
+        .cta-box .download-application:hover { background: #b07e20; }
+        .cta-box .download-expiry { color: rgba(255,255,255,.7); text-align: left; }
+
         /* Warning / danger panels */
         .panel-danger {
             background: #fff5f5;
@@ -245,13 +304,15 @@
 <div class="card">
 
     {{-- Header --}}
-    <div class="card-header">
+    <div class="card-header {{ $isValid ? 'valid-header' : '' }}">
+        @if(!$isValid)
         <div class="logo-wrap">
             <img src="{{ asset('img/logo.png') }}" alt="RUSL" onerror="this.style.display='none'">
         </div>
+        @endif
 
         @if($isValid)
-            <div class="status-badge valid"><i class="fas fa-circle-check"></i> Transcript Verified & Valid</div>
+            <div class="status-badge valid"><i class="fas fa-circle-check"></i> Valid - Officially Issued Transcript</div>
             <h1>Authenticity Confirmed</h1>
             <p class="sub">This transcript is authentic and currently active.</p>
         @elseif($transcript)
@@ -264,6 +325,15 @@
             <p class="sub">The details you provided do not match any record in our system.</p>
         @endif
     </div>
+
+    @if($isValid)
+    <div class="doc-meta">
+        <div><span class="lbl">Document ID</span><span class="val">{{ $transcript->document_id }}</span></div>
+        <div><span class="lbl">Date Issued</span><span class="val">{{ $transcript->issued_at ? $transcript->issued_at->format('d F Y') : '—' }}</span></div>
+        <div><span class="lbl">Verified At</span><span class="val">{{ now()->format('d M Y, H:i') }} IST</span></div>
+        <div><span class="lbl">Status</span><span class="val" style="color:#059669;">● Active</span></div>
+    </div>
+    @endif
 
     {{-- Body --}}
     <div class="card-body">
@@ -319,6 +389,28 @@
                     <strong>Officially Verified</strong>
                     Faculty of Agriculture, Rajarata University of Sri Lanka &mdash; verified {{ now()->format('d M Y \a\t H:i') }} (IST)
                 </div>
+            </div>
+
+            <div class="notice-box">
+                <h4><i class="fas fa-lock"></i> Official Data Restriction Notice</h4>
+                This service confirms <strong>authenticity and final award status only</strong>.
+                Individual course results, semester GPAs, and credit breakdowns are
+                <strong>not published online</strong> as they form part of the university's confidential academic records.
+            </div>
+
+            <div class="cta-box">
+                <h4>Need a Detailed Certified Verification Report?</h4>
+                <p>For professional licensing boards, immigration authorities, or postgraduate admission purposes, the Examinations Division provides an official certified verification letter with full course details. Processing time: 5-10 working days.</p>
+                @if($applicationFormUrl)
+                <a href="{{ $applicationFormUrl }}" class="download-application">
+                    <i class="fas fa-file-arrow-down"></i>
+                    <span>
+                        <strong>Download Application Form</strong>
+                        <small>Pre-filled with the verified transcript details</small>
+                    </span>
+                </a>
+                <p class="download-expiry">This secure download link expires in 10 minutes.</p>
+                @endif
             </div>
 
         @elseif($transcript)

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Transcript;
 use App\VerificationAuditLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class VerificationController extends Controller
 {
@@ -81,10 +83,34 @@ class VerificationController extends Controller
         // If index_no doesn't match, treat it as "not found" to avoid leaking info
         $resultTranscript = ($transcript && $indexMatches) ? $transcript : null;
 
+        $applicationFormUrl = null;
+        if ($isValid) {
+            $applicationFormUrl = URL::temporarySignedRoute(
+                'verification.application-form',
+                now()->addMinutes(10),
+                ['transcript' => $transcript->id]
+            );
+        }
+
         return view('verification.result', [
             'transcript' => $resultTranscript,
             'isValid'    => $isValid,
             'documentId' => $documentId,
+            'applicationFormUrl' => $applicationFormUrl,
         ]);
+    }
+
+    public function downloadApplicationForm(Transcript $transcript)
+    {
+        abort_unless($transcript->status === 'active', 404);
+
+        $transcript->load('student');
+
+        return Pdf::loadView('verification.pdf.application-form', [
+            'transcript' => $transcript,
+            'student' => $transcript->student,
+        ])->setPaper('a4', 'portrait')->download(
+            'transcript-verification-application-' . $transcript->id . '.pdf'
+        );
     }
 }

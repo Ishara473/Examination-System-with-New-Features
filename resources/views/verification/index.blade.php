@@ -17,19 +17,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 2rem;
+            color: #1e293b;
         }
+        main { width: 100%; max-width: 760px; margin: 36px auto 60px; padding: 0 20px; }
 
         .card {
-            background: rgba(255,255,255,0.97);
-            border-radius: 20px;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-            max-width: 520px;
-            width: 100%;
-            padding: 2.5rem 3rem;
-            text-align: center;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.08);
+            overflow: hidden;
         }
+
+        .card-header { padding: 28px 32px 22px; border-bottom: 1px solid #cbd5e1; }
+        .card-header h1 { font-family: Georgia, serif; font-size: 22px; color: #1a3a6b; margin-bottom: 0; }
+        .card-header p { color: #64748b; font-size: 14px; margin-top: 6px; line-height: 1.5; }
+        .card-body { padding: 28px 32px; }
 
         .logo-wrap {
             margin-bottom: 1.5rem;
@@ -41,30 +43,16 @@
 
         .badge {
             display: inline-block;
-            background: #fef3c7;
-            color: #92400e;
+            background: #e8f0fb;
+            color: #1a3a6b;
             font-size: 0.7rem;
             font-weight: 600;
             letter-spacing: .08em;
             text-transform: uppercase;
             padding: .35rem .9rem;
             border-radius: 99px;
-            border: 1px solid #fde68a;
-            margin-bottom: 1.2rem;
-        }
-
-        h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: .5rem;
-        }
-
-        p.subtitle {
-            font-size: .93rem;
-            color: #6b7280;
-            margin-bottom: 2rem;
-            line-height: 1.6;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 1rem;
         }
 
         form { text-align: left; }
@@ -96,9 +84,9 @@
         input[type="text"] {
             width: 100%;
             padding: .85rem 1rem .85rem 2.8rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: .95rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: .9rem;
             font-family: 'Inter', sans-serif;
             color: #1f2937;
             transition: border-color .2s, box-shadow .2s;
@@ -106,8 +94,8 @@
         }
 
         input[type="text"]:focus {
-            border-color: #7b1113;
-            box-shadow: 0 0 0 3px rgba(123,17,19,.12);
+            border-color: #1a3a6b;
+            box-shadow: 0 0 0 3px rgba(26,58,107,.12);
         }
 
         input[type="text"]::placeholder { color: #d1d5db; }
@@ -135,13 +123,13 @@
         .separator::before, .separator::after {
             content: '';
             flex: 1;
-            border-top: 1px dashed #e5e7eb;
+            border-top: 1px solid #cbd5e1;
         }
 
         button[type="submit"] {
             width: 100%;
             padding: .9rem;
-            background: linear-gradient(135deg, #7b1113, #a31517);
+            background: #1a3a6b;
             color: #fff;
             border: none;
             border-radius: 10px;
@@ -155,7 +143,7 @@
             justify-content: center;
             gap: .6rem;
             margin-top: 1.5rem;
-            box-shadow: 0 4px 14px rgba(123,17,19,.35);
+            box-shadow: 0 4px 14px rgba(26,58,107,.25);
         }
 
         button[type="submit"]:hover { opacity: .9; transform: translateY(-1px); }
@@ -189,8 +177,16 @@
         .security-note i { color: #16a34a; font-size: .85rem; flex-shrink: 0; margin-top: .1rem; }
         .security-note p { font-size: .78rem; color: #166534; line-height: 1.5; }
 
+        .scan-box, .service-box { margin-top: 20px; padding: 14px 16px; border-radius: 8px; font-size: 13px; line-height: 1.6; text-align: left; }
+        .scan-box { background: #e8f0fb; border-left: 4px solid #1a3a6b; color: #1a3a6b; }
+        .service-box { background: #f8fafc; color: #64748b; }
+        .service-box strong, .scan-box strong { color: #1e293b; }
+        .scan-box i { margin-right: 5px; }
+
+        .card-footer { padding: 14px 32px; border-top: 1px solid #cbd5e1; color: #64748b; font-size: 12px; line-height: 1.5; }
+
         .footer-note {
-            margin-top: 2rem;
+            margin-top: 1.8rem;
             font-size: .78rem;
             color: rgba(255,255,255,.5);
             text-align: center;
@@ -203,20 +199,23 @@
             to   { opacity:1; transform:translateY(0); }
         }
         .card { animation: fadeUp .5s ease; }
+
+        @media (max-width: 600px) {
+            main { margin: 20px auto 40px; padding: 0 12px; }
+            .card-header, .card-body, .card-footer { padding-left: 16px; padding-right: 16px; }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="logo-wrap">
-            <img src="{{ asset('img/logo.png') }}" alt="RUSL Logo" onerror="this.style.display='none'">
+    <main>
+      <div class="card">
+        <div class="card-header">
+            <div class="badge"><i class="fas fa-shield-alt"></i> &nbsp; Official Verification Portal</div>
+            <h1>Transcript Verification</h1>
+            <p>Verify the authenticity of an academic transcript issued by the Faculty of Agriculture, RUSL.</p>
         </div>
 
-        <div class="badge"><i class="fas fa-shield-alt"></i> &nbsp; Official Verification Portal</div>
-
-        <h1>Transcript Verification</h1>
-        <p class="subtitle">
-            Enter the details printed on your official transcript to verify its authenticity with the Faculty of Agriculture, Rajarata University of Sri Lanka.
-        </p>
+        <div class="card-body">
 
         @if($errors->any())
         <div class="alert-error">
@@ -235,7 +234,7 @@
                     type="text"
                     id="document_id"
                     name="document_id"
-                    placeholder="e.g. RUSL/FOA/2026/TR/138"
+                    placeholder="e.g. RUSL/FOA/2026/TR/042"
                     value="{{ old('document_id', request('doc')) }}"
                     autofocus
                     required
@@ -252,7 +251,7 @@
                     type="text"
                     id="index_no"
                     name="index_no"
-                    placeholder="e.g. AC/2019/011"
+                    placeholder="e.g. AG/19017"
                     value="{{ old('index_no') }}"
                     required
                 >
@@ -268,7 +267,19 @@
             <i class="fas fa-lock"></i>
             <p>Both fields must match the same transcript record. Your verification attempt is logged for security purposes.</p>
         </div>
-    </div>
+
+        <div class="scan-box">
+            <i class="fas fa-mobile-screen-button"></i><strong>Scan via QR Code</strong> &mdash; Point your phone camera at the QR code printed on the physical transcript. It will open the verification result page automatically &mdash; no typing needed.
+        </div>
+
+        <div class="service-box">
+            <strong>What this service provides:</strong><br>
+            This online verification confirms the <strong>authenticity and final award status</strong> of official transcripts only. Individual course-by-course grades are <strong>not displayed online</strong>. For certified detailed reports, please contact the Examinations Division.
+        </div>
+        </div>
+        <div class="card-footer">Use the Document ID and Index Number printed on the same transcript.</div>
+      </div>
+    </main>
 
     <p class="footer-note">
         &copy; {{ date('Y') }} Faculty of Agriculture, Rajarata University of Sri Lanka.<br>
