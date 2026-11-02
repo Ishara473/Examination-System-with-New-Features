@@ -272,7 +272,10 @@ class AdminTranscriptController extends Controller
                $docId = 'RUSL/FOA/' . $docYear . '/TR/' . str_pad($std->id, 3, '0', STR_PAD_LEFT);
 
                // Verification URL encoded into QR code — pre-fills Document ID on the landing page
-               $verifyUrl = url('/verify') . '?doc=' . urlencode($docId);
+              // $verifyUrl = url('/verify') . '?doc=' . urlencode($docId);
+              // New – uses the APP_URL you set in .env
+$verifyUrl = rtrim(config('app.url'), '/') . '/verify?doc=' . urlencode($docId);
+
 
                // Generate QR code as PNG using GD (no imagick needed)
                $qrOptions = new QROptions([
