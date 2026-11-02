@@ -12,6 +12,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentExamController;
 use App\Http\Controllers\StudentRegistrationController;
+use App\Http\Controllers\VerificationAuditLogController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -180,6 +181,8 @@ Route::prefix('transcripts')->group(function () {
     Route::put('/{id}',      [App\Http\Controllers\TranscriptController::class, 'update'])->name('transcripts.update');
     Route::delete('/{id}',   [App\Http\Controllers\TranscriptController::class, 'destroy'])->name('transcripts.destroy');
 });
+Route::get('/admin/verification-audit-logs', [VerificationAuditLogController::class, 'index'])
+    ->name('admin.verification-audit-logs.index');
 // Public transcript verification (no auth required)
 Route::get('/verify', [App\Http\Controllers\VerificationController::class, 'index'])->name('verification.index');
 Route::post('/verify', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.search');

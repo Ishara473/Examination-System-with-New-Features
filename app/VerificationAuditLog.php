@@ -21,5 +21,10 @@ class VerificationAuditLog extends Model
     protected $casts = [
         'is_valid' => 'boolean',
     ];
+
+    public function transcript()
+    {
+        return $this->belongsTo(Transcript::class);
+    }
 }
 
