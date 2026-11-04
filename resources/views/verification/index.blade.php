@@ -226,6 +226,7 @@
 
         <form action="{{ url('/verify') }}" method="POST" autocomplete="off">
             @csrf
+            <input type="hidden" name="verification_method" value="{{ request()->filled('doc') ? 'qr_code' : 'manual' }}">
 
             <label for="document_id">Document ID</label>
             <div class="input-wrap">

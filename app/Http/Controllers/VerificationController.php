@@ -36,7 +36,7 @@ class VerificationController extends Controller
             ]);
             $documentId = trim($request->input('document_id'));
             $indexNo    = trim($request->input('index_no'));
-            $method     = 'manual';
+            $method     = $request->input('verification_method') === 'qr_code' ? 'qr_code' : 'manual';
         } else {
             // QR code direct link — index_no comes as query string (?index_no=...)
             $indexNo = trim($request->query('index_no', ''));
@@ -71,6 +71,7 @@ class VerificationController extends Controller
 
         // Log the verification attempt
         VerificationAuditLog::create([
+            'transcript_id'            => $transcript ? $transcript->id : null,
             'document_id_searched'     => $documentId,
             'registration_no_searched' => $transcript ? optional($transcript->student)->registration_no : null,
             'verification_method'      => $method,

@@ -7,50 +7,35 @@ use Illuminate\Http\Request;
 
 class TranscriptController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $transcripts = Transcript::with(['student', 'tokens'])->paginate(15);
-        return view('transcripts.index', compact('transcripts'));
+        $allowedSorts = [
+            'id'          => 'transcripts.id',
+            'document_id' => 'transcripts.document_id',
+            'degree_name' => 'transcripts.degree_name',
+            'fgpa'        => 'transcripts.fgpa',
+            'class_name'  => 'transcripts.class_name',
+            'issued_at'   => 'transcripts.issued_at',
+        ];
+
+        $sort = $request->input('sort', 'id');
+        if (!array_key_exists($sort, $allowedSorts)) {
+            $sort = 'id';
+        }
+
+        $direction = strtolower($request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        $transcripts = Transcript::with('student')
+            ->orderBy($allowedSorts[$sort], $direction)
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('transcripts.index', compact('transcripts', 'sort', 'direction'));
     }
 
     public function show($id)
     {
-        $transcript = Transcript::with(['student', 'tokens', 'auditLogs'])->findOrFail($id);
+        $transcript = Transcript::with('student')->findOrFail($id);
         return view('transcripts.show', compact('transcript'));
-    }
-
-    public function edit($id)
-    {
-        $transcript = Transcript::findOrFail($id);
-        return view('transcripts.edit', compact('transcript'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $transcript = Transcript::findOrFail($id);
-
-        $validated = $request->validate([
-            'document_id' => 'required|string|max:50|unique:transcripts,document_id,' . $id,
-            'student_id'  => 'required|integer',
-            'degree_name' => 'nullable|string|max:255',
-            'fgpa'        => 'nullable|numeric|min:0|max:4',
-            'class_name'  => 'nullable|string|max:100',
-            'effective_date' => 'nullable|date',
-            'status'      => 'required|in:active,revoked,superseded',
-            'status_reason' => 'nullable|string',
-            'issued_at'   => 'nullable|date',
-        ]);
-
-        $transcript->update($validated);
-        return redirect()->route('transcripts.show', $transcript->id)
-                         ->with('success', 'Transcript updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $transcript = Transcript::findOrFail($id);
-        $transcript->delete();
-        return redirect()->route('transcripts.index')
-                         ->with('success', 'Transcript removed.');
     }
 }

@@ -93,7 +93,6 @@ Verification Audit Log
                         <th>Result</th>
                         <th>Failure reason</th>
                         <th>IP address</th>
-                        <th>User agent</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,10 +117,9 @@ Verification Audit Log
                         </td>
                         <td>{{ $log->failure_reason ?: '—' }}</td>
                         <td>{{ $log->ip_address ?: '—' }}</td>
-                        <td title="{{ $log->user_agent }}">{{ $log->user_agent ? \Illuminate\Support\Str::limit($log->user_agent, 45) : '—' }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="text-center">No verification attempts found.</td></tr>
+                    <tr><td colspan="7" class="text-center">No verification attempts found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

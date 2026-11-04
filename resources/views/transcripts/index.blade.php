@@ -18,15 +18,26 @@ Transcript Records
         <div class="table-responsive">
             <table class="table table-striped table-bordered compact">
                 <thead>
+                    @php
+                        $sortLink = function ($col, $label) use ($sort, $direction) {
+                            $isCurrent = ($sort ?? 'id') === $col;
+                            $nextDir = ($isCurrent && ($direction ?? 'desc') === 'asc') ? 'desc' : 'asc';
+                            $icon = $isCurrent
+                                ? (($direction ?? 'desc') === 'asc' ? 'fa-sort-up' : 'fa-sort-down')
+                                : 'fa-sort text-muted';
+                            $url = route('transcripts.index', ['sort' => $col, 'direction' => $nextDir]);
+                            return '<a href="' . $url . '" class="text-dark d-flex justify-content-between align-items-center text-decoration-none"><span>' . e($label) . '</span><i class="fas ' . $icon . ' ml-1"></i></a>';
+                        };
+                    @endphp
                     <tr>
-                        <th>#</th>
-                        <th>Document ID</th>
+                        <th>{!! $sortLink('id', '#') !!}</th>
+                        <th>{!! $sortLink('document_id', 'Document ID') !!}</th>
                         <th>Student</th>
-                        <th>Degree</th>
-                        <th>FGPA</th>
-                        <th>Class</th>
+                        <th>{!! $sortLink('degree_name', 'Degree') !!}</th>
+                        <th>{!! $sortLink('fgpa', 'FGPA') !!}</th>
+                        <th>{!! $sortLink('class_name', 'Class') !!}</th>
                         <th>Status</th>
-                        <th>Issued At</th>
+                        <th>{!! $sortLink('issued_at', 'Issued At') !!}</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -60,15 +71,6 @@ Transcript Records
                             <a href="{{ route('transcripts.show', $t->id) }}" class="btn btn-sm btn-info btn-icon-split">
                                 <span class="icon"><i class="fas fa-eye"></i></span><span class="text">View</span>
                             </a>
-                            <a href="{{ route('transcripts.edit', $t->id) }}" class="btn btn-sm btn-warning btn-icon-split">
-                                <span class="icon"><i class="fas fa-edit"></i></span><span class="text">Edit</span>
-                            </a>
-                            <form action="{{ route('transcripts.destroy', $t->id) }}" method="POST" style="display:inline;">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-danger btn-icon-split" onclick="return confirm('Delete this transcript?')">
-                                    <span class="icon"><i class="fas fa-trash"></i></span><span class="text">Delete</span>
-                                </button>
-                            </form>
                         </td>
                     </tr>
                     @empty

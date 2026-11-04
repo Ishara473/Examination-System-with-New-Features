@@ -9,6 +9,7 @@ class VerificationAuditLog extends Model
     protected $table = 'verification_audit_logs';
 
     protected $fillable = [
+        'transcript_id',
         'document_id_searched',
         'registration_no_searched',
         'verification_method',

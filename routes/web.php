@@ -175,11 +175,8 @@ Route::get('/admin/transcripts/final-detail-certificate', [AdminTranscriptContro
 Route::get('/admin/transcripts/final-detail-certificate-download', [AdminTranscriptController::class, 'print_final_detail_certificate_download']);
 // Transcript registry routes (read + manage status only — records auto-created on PDF download)
 Route::prefix('transcripts')->group(function () {
-    Route::get('/',           [App\Http\Controllers\TranscriptController::class, 'index'])->name('transcripts.index');
-    Route::get('/{id}',      [App\Http\Controllers\TranscriptController::class, 'show'])->name('transcripts.show');
-    Route::get('/{id}/edit', [App\Http\Controllers\TranscriptController::class, 'edit'])->name('transcripts.edit');
-    Route::put('/{id}',      [App\Http\Controllers\TranscriptController::class, 'update'])->name('transcripts.update');
-    Route::delete('/{id}',   [App\Http\Controllers\TranscriptController::class, 'destroy'])->name('transcripts.destroy');
+    Route::get('/',     [App\Http\Controllers\TranscriptController::class, 'index'])->name('transcripts.index');
+    Route::get('/{id}', [App\Http\Controllers\TranscriptController::class, 'show'])->name('transcripts.show');
 });
 Route::get('/admin/verification-audit-logs', [VerificationAuditLogController::class, 'index'])
     ->name('admin.verification-audit-logs.index');
