@@ -4,11 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Transcript;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TranscriptController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:users');
+    }
+
+    private function authorizeAccess(): void
+    {
+        $user = Auth::guard('users')->user();
+        abort_unless(
+            $user && ($user->hasRole('Admin') || $user->hasPermissionTo('transcript:print')),
+            403,
+            'Unauthorized action.'
+        );
+    }
+
     public function index(Request $request)
     {
+        $this->authorizeAccess();
+
         $allowedSorts = [
             'id'          => 'transcripts.id',
             'document_id' => 'transcripts.document_id',
@@ -35,6 +53,8 @@ class TranscriptController extends Controller
 
     public function show($id)
     {
+        $this->authorizeAccess();
+
         $transcript = Transcript::with('student')->findOrFail($id);
         return view('transcripts.show', compact('transcript'));
     }
