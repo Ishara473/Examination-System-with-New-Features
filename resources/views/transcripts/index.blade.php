@@ -79,7 +79,7 @@ Transcript Records
                 </tbody>
             </table>
         </div>
-        <div class="mt-2">{{ $transcripts->links() }}</div>
+        <div class="mt-2">{{ $transcripts->links('pagination::bootstrap-4') }}</div>
     </div>
 </div>
 @endsection

@@ -100,11 +100,7 @@ Verification Audit Log
                     <tr>
                         <td>{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
                         <td>
-                            @if($log->transcript)
-                            <a href="{{ route('transcripts.show', $log->transcript->id) }}"><code>{{ $log->document_id_searched }}</code></a>
-                            @else
                             <code>{{ $log->document_id_searched ?: '—' }}</code>
-                            @endif
                         </td>
                         <td>{{ $log->registration_no_searched ?: '—' }}</td>
                         <td>{{ $log->verification_method === 'qr_code' ? 'QR code' : 'Manual' }}</td>
@@ -124,7 +120,7 @@ Verification Audit Log
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">{{ $logs->links() }}</div>
+        <div class="mt-3">{{ $logs->links('pagination::bootstrap-4') }}</div>
     </div>
 </div>
 @endsection
