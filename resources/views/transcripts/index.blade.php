@@ -58,13 +58,7 @@ Transcript Records
                         <td>{{ $t->fgpa ?? '—' }}</td>
                         <td>{{ $t->class_name ?? '—' }}</td>
                         <td>
-                            @if($t->status === 'active')
-                                <span class="badge badge-success">Active</span>
-                            @elseif($t->status === 'revoked')
-                                <span class="badge badge-danger">Revoked</span>
-                            @else
-                                <span class="badge badge-secondary">{{ ucfirst($t->status) }}</span>
-                            @endif
+                            <span class="badge badge-success">Active</span>
                         </td>
                         <td>{{ $t->issued_at ? $t->issued_at->format('Y-m-d') : '—' }}</td>
                         <td class="text-center">

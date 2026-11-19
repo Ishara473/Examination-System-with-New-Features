@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
         @if($isValid) ✅ Valid Transcript
-        @elseif($transcript) ❌ Revoked Transcript
         @else ⚠️ Not Found
         @endif
         | Faculty of Agriculture, RUSL
@@ -315,10 +314,6 @@
             <div class="status-badge valid"><i class="fas fa-circle-check"></i> Valid - Officially Issued Transcript</div>
             <h1>Authenticity Confirmed</h1>
             <p class="sub">This transcript is authentic and currently active.</p>
-        @elseif($transcript)
-            <div class="status-badge revoked"><i class="fas fa-ban"></i> Transcript {{ ucfirst($transcript->status) }}</div>
-            <h1>Transcript No Longer Valid</h1>
-            <p class="sub">This document exists in our records but its status has been changed.</p>
         @else
             <div class="status-badge unknown"><i class="fas fa-triangle-exclamation"></i> Record Not Found</div>
             <h1>No Matching Transcript</h1>
@@ -412,24 +407,6 @@
                 <p class="download-expiry">This secure download link expires in 10 minutes.</p>
                 @endif
             </div>
-
-        @elseif($transcript)
-            <div class="info-grid">
-                <div class="info-cell">
-                    <div class="lbl">Document ID</div>
-                    <div class="val mono">{{ $transcript->document_id }}</div>
-                </div>
-                <div class="info-cell">
-                    <div class="lbl">Status</div>
-                    <div class="val" style="color:#dc2626;font-weight:700;"><i class="fas fa-ban"></i> {{ ucfirst($transcript->status) }}</div>
-                </div>
-            </div>
-            @if($transcript->status_reason)
-            <div class="panel-danger">
-                <div class="lbl">Reason</div>
-                <div class="val">{{ $transcript->status_reason }}</div>
-            </div>
-            @endif
 
         @else
             <div class="panel-warn">

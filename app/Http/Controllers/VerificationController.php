@@ -54,17 +54,13 @@ class VerificationController extends Controller
             && strtoupper(str_replace(' ', '', $transcript->student->index_no))
                === strtoupper(str_replace(' ', '', $indexNo));
 
-        $isValid = $transcript
-                   && $indexMatches
-                   && $transcript->status === 'active';
+        $isValid = (bool) ($transcript && $indexMatches);
 
         // Determine failure reason for the audit log
         if (!$transcript) {
             $failureReason = 'not_found';
         } elseif (!$indexMatches) {
             $failureReason = 'index_no_mismatch';
-        } elseif ($transcript->status !== 'active') {
-            $failureReason = $transcript->status;  // 'revoked' / 'superseded'
         } else {
             $failureReason = null;
         }
@@ -103,8 +99,6 @@ class VerificationController extends Controller
 
     public function downloadApplicationForm(Transcript $transcript)
     {
-        abort_unless($transcript->status === 'active', 404);
-
         $transcript->load('student');
 
         return Pdf::loadView('verification.pdf.application-form', [

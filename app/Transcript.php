@@ -49,16 +49,6 @@ class Transcript extends Model
         return $this->belongsTo(\App\User::class, 'status_updated_by', 'id');
     }
 
-    public function tokens()
-    {
-        return $this->hasMany(\App\TranscriptToken::class, 'transcript_id', 'id');
-    }
-
-    public function activeToken()
-    {
-        return $this->hasOne(\App\TranscriptToken::class, 'transcript_id', 'id')->where('status', 'active')->latestOfMany();
-    }
-
     public function auditLogs()
     {
         return $this->hasMany(\App\VerificationAuditLog::class, 'transcript_id', 'id');
