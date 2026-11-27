@@ -67,6 +67,7 @@
                         @if(( Auth::user()->hasPermissionTo('student:edit') || Auth::user()->hasRole('Admin')))
                         <a class="collapse-item" href="{{url('/admin/student/upload-scholarship')}}">Update Scholarships</a>
                         @endif
+                        <a class="collapse-item" href="{{url('/admin/student/student-ship-letter')}}">Studentship Letter</a>
                     </div>
                 </div>
             </li>
@@ -190,6 +191,7 @@
                 </div>
                 <div class="row m-1">
                     <div class="col-md-12">
+                        @sectionMissing('hide_alerts')
                         @if(session('success'))
                         <div class="row m-1">
                             <div class="col-md-12 alert alert-success">
@@ -202,6 +204,7 @@
                                 {{session('error')}}
                             </div>
                         </div>
+                        @endif
                         @endif
                     </div>
                     <div class="col-md-12 main-content">

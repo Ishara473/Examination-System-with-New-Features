@@ -47,6 +47,7 @@ use App\Imports\ScholarshipImport;
 
 
 use App\Exports\StudentExport;
+use PDF;
 
 
 class AdminStudentController extends Controller{
@@ -1078,7 +1079,215 @@ class AdminStudentController extends Controller{
 
         return -1;
     }
-        
+
+    /* **********************************************************************************************/
+    /* ************************************* Studentship Letter ************************************/
+    /* **********************************************************************************************/
+
+    public function student_ship_letter(Request $request){
+        if (!(Auth::user()->hasPermissionTo('student:view') || Auth::user()->hasRole('Admin') )){ 
+            abort(403, 'Unauthorized action.');
+        }
+        return view('admin.students.student-ship-letter');
+    }
+
+    public function search_studentship_letter_students(Request $request){
+        if (!(Auth::user()->hasPermissionTo('student:view') || Auth::user()->hasRole('Admin') )){ 
+            abort(403, 'Unauthorized action.');
+        }
+
+        $q = trim($request->get('q', ''));
+        if (empty($q)) {
+            return response()->json([]);
+        }
+
+        $cleanQ = str_replace(['.', ' ', '/', '-'], '', $q);
+
+        $students = Student::leftJoin('student_academic_details', 'student_personal_details.id', '=', 'student_academic_details.student_id')
+            ->leftJoin('master_batch', 'student_academic_details.batch', '=', 'master_batch.id')
+            ->where(function($query) use ($q, $cleanQ) {
+                $query->where('student_personal_details.registration_no', 'LIKE', "%{$q}%")
+                      ->orWhere('student_personal_details.id_no', 'LIKE', "%{$q}%")
+                      ->orWhere('student_personal_details.full_name', 'LIKE', "%{$q}%")
+                      ->orWhere('student_personal_details.name_marking', 'LIKE', "%{$q}%")
+                      ->orWhere('student_personal_details.initials', 'LIKE', "%{$q}%")
+                      ->orWhere(DB::raw("CONCAT(student_personal_details.initials, ' ', student_personal_details.name_marking)"), 'LIKE', "%{$q}%")
+                      ->orWhere(DB::raw("CONCAT(student_personal_details.name_marking, ' ', student_personal_details.initials)"), 'LIKE', "%{$q}%");
+
+                if (!empty($cleanQ)) {
+                    $query->orWhere(DB::raw("REPLACE(REPLACE(CONCAT(student_personal_details.initials, student_personal_details.name_marking), '.', ''), ' ', '')"), 'LIKE', "%{$cleanQ}%")
+                          ->orWhere(DB::raw("REPLACE(REPLACE(student_personal_details.registration_no, '/', ''), '-', '')"), 'LIKE', "%{$cleanQ}%");
+                }
+            })
+            ->select(
+                'student_personal_details.id',
+                'student_personal_details.registration_no',
+                'student_personal_details.full_name',
+                'student_personal_details.initials',
+                'student_personal_details.name_marking',
+                'student_personal_details.id_no',
+                'student_personal_details.status as personal_status',
+                'student_academic_details.current_study_year',
+                'student_academic_details.status as academic_status',
+                'student_academic_details.is_batch_miss',
+                'master_batch.code as batch_code'
+            )
+            ->take(15)
+            ->get();
+
+        $results = $students->map(function($student) {
+            $name = trim($student->initials . ' ' . $student->name_marking);
+            if (empty($name)) {
+                $name = $student->full_name;
+            }
+
+            $isEligible = ($student->personal_status == 1 && $student->academic_status == 1 && $student->is_batch_miss == 0);
+
+            $statusText = 'Enrolled';
+            if ($student->academic_status == 2 || $student->personal_status == 2) {
+                $statusText = 'Graduated';
+            } elseif ($student->academic_status == -1) {
+                $statusText = 'Dropped';
+            } elseif ($student->is_batch_miss == 1) {
+                $statusText = 'Batch-Miss';
+            } elseif ($student->personal_status != 1) {
+                $statusText = 'Inactive';
+            }
+
+            return [
+                'id' => $student->id,
+                'registration_no' => $student->registration_no,
+                'name' => $name,
+                'id_no' => $student->id_no,
+                'batch' => $student->batch_code ?? 'N/A',
+                'current_year' => $student->current_study_year ? $student->current_study_year . ' Year' : '',
+                'status_text' => $statusText,
+                'is_eligible' => $isEligible
+            ];
+        });
+
+        return response()->json($results);
+    }
+
+    public function generate_student_ship_letter(Request $request){
+        if (!(Auth::user()->hasPermissionTo('student:view') || Auth::user()->hasRole('Admin') )){ 
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'registration_no' => 'required',
+            'semester' => 'nullable|string'
+        ]);
+        if($validator->fails()){
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $semesterInput = $request->input('semester', '1st Semester');
+        $semester = in_array($semesterInput, ['1st Semester', '2nd Semester']) ? $semesterInput : '1st Semester';
+
+        // Validate student exists
+        $studentPersonal = Student::where('registration_no', $request->registration_no)->first();
+        if (empty($studentPersonal)) {
+            return redirect()->back()->with('error', 'Student not found with this registration number.')->withInput();
+        }
+
+        // Fetch academic details
+        $academicDetail = StudentAccDetail::where('student_id', $studentPersonal->id)->first();
+
+        // 1. Check if student has graduated
+        if ($studentPersonal->status == 2 || (!empty($academicDetail) && ($academicDetail->status == 2 || $academicDetail->is_complete == 1))) {
+            return redirect()->back()->with('error', 'This student has graduated and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 2. Check if student has been dropped
+        if (!empty($academicDetail) && $academicDetail->status == -1) {
+            return redirect()->back()->with('error', 'This student has been dropped and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 3. Validate academic details exist
+        if (empty($academicDetail)) {
+            return redirect()->back()->with('error', 'Academic details for this student could not be found.')->withInput();
+        }
+
+        // 4. Validate student_academic_details.batch is not null/empty
+        if (empty($academicDetail->batch)) {
+            return redirect()->back()->with('error', 'This student does not have an assigned academic batch and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 5. Validate student_academic_details.is_batch_miss = 0 (not a batch-miss student)
+        if ($academicDetail->is_batch_miss != 0) {
+            return redirect()->back()->with('error', 'This student is classified as batch-missing and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 6. Validate student_academic_details.status = 1 (Enrolled)
+        if ($academicDetail->status != 1) {
+            return redirect()->back()->with('error', 'This student is not currently enrolled and is not eligible for a studentship letter.')->withInput();
+        }
+
+        // 7. Validate student_personal_details.status = 1 (active account)
+        if ($studentPersonal->status != 1) {
+            return redirect()->back()->with('error', 'This student account is inactive or deactivated and is not eligible for a studentship letter.')->withInput();
+        }
+
+        $student = Student::join('student_academic_details','student_personal_details.id','=','student_academic_details.student_id')
+                        ->join('master_batch','student_academic_details.batch','=','master_batch.id')
+                        ->join('master_degree_programs','master_batch.program_id','=','master_degree_programs.id')
+                        ->leftJoin('master_course_specialization_categories','student_academic_details.specialization_id','=','master_course_specialization_categories.id')
+                        ->where('student_personal_details.registration_no','=',$request->registration_no)
+                        ->select(
+                            'student_personal_details.id',
+                            'student_personal_details.full_name',
+                            'student_personal_details.initials',
+                            'student_personal_details.name_marking',
+                            'student_personal_details.gender',
+                            'student_personal_details.registration_no',
+                            'student_academic_details.registration_date',
+                            'student_academic_details.current_study_year',
+                            'master_degree_programs.name as degree_program',
+                            'master_course_specialization_categories.name as specialization'
+                        )
+                        ->first();
+
+        if (empty($student)) {
+            return redirect()->back()->with('error', 'Degree program or batch details could not be found for this student.')->withInput();
+        }
+
+        $genderTitle = ($student->gender == 1) ? 'Mr.' : 'Ms.';
+        $studentName = $genderTitle . ' ' . $student->initials . ' ' . $student->name_marking;
+        $pronoun = ($student->gender == 1) ? 'he' : 'she';
+
+        $degreeName = $student->degree_program;
+        $isHonoursDegree = str_contains(strtolower($student->degree_program), 'honours');
+        $degreeDuration = $isHonoursDegree ? 'four years' : 'three years';
+
+        $registrationDate = Carbon::parse($student->registration_date);
+        $formattedDate = $registrationDate->format('jS F Y');
+
+        $currentStudyYear = $student->current_study_year;
+        $yearNames = [1 => '1st', 2 => '2nd', 3 => '3rd', 4 => '4th', 5 => '5th'];
+        $currentYearName = isset($yearNames[$currentStudyYear]) ? $yearNames[$currentStudyYear] : $currentStudyYear . 'th';
+
+        $currentDate = Carbon::now()->format('Y.m.d');
+
+        $data = [
+            'student_name' => $studentName,
+            'registration_no' => $student->registration_no,
+            'degree_program' => $degreeName,
+            'registration_date' => $formattedDate,
+            'degree_duration' => $degreeDuration,
+            'current_year' => $currentYearName,
+            'semester' => $semester,
+            'letter_date' => $currentDate,
+            'pronoun' => $pronoun,
+        ];
+
+        $pdf = PDF::loadView('admin.students.pdf.student-ship-letter', $data)
+                    ->setPaper('a4', 'portrait');
+
+        $filename = 'StudentshipLetter_' . str_replace('/', '-', $student->registration_no) . '.pdf';
+        return $pdf->download($filename);
+    }
+
 
 
 
