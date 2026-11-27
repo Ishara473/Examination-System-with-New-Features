@@ -12,6 +12,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentExamController;
 use App\Http\Controllers\StudentRegistrationController;
+use App\Http\Controllers\VerificationAuditLogController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -176,3 +177,20 @@ Route::get('/admin/transcripts/final-transcripts', [AdminTranscriptController::c
 Route::get('/admin/transcripts/final-transcripts-download', [AdminTranscriptController::class, 'print_final_transcripts_download']);
 Route::get('/admin/transcripts/final-detail-certificate', [AdminTranscriptController::class, 'print_final_detail_certificate_view']);
 Route::get('/admin/transcripts/final-detail-certificate-download', [AdminTranscriptController::class, 'print_final_detail_certificate_download']);
+// Transcript registry routes (read + manage status only — records auto-created on PDF download)
+Route::prefix('transcripts')->group(function () {
+    Route::get('/',     [App\Http\Controllers\TranscriptController::class, 'index'])->name('transcripts.index');
+    Route::get('/{id}', [App\Http\Controllers\TranscriptController::class, 'show'])->name('transcripts.show');
+});
+Route::get('/admin/verification-audit-logs', [VerificationAuditLogController::class, 'index'])
+    ->name('admin.verification-audit-logs.index');
+// Public transcript verification (no auth required)
+Route::get('/verify', [App\Http\Controllers\VerificationController::class, 'index'])->name('verification.index');
+Route::post('/verify', [App\Http\Controllers\VerificationController::class, 'show'])->name('verification.search');
+Route::get('/verify/application-form/{transcript}', [App\Http\Controllers\VerificationController::class, 'downloadApplicationForm'])
+    ->middleware('signed')
+    ->name('verification.application-form');
+// QR code on PDF links here → redirects to landing page with document_id pre-filled
+Route::get('/verify/transcript/{documentId}', function ($documentId) {
+    return redirect()->to(url('/verify') . '?doc=' . urlencode($documentId));
+})->name('verification.qr')->where('documentId', '.*');

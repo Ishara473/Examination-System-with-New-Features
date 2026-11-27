@@ -9,6 +9,8 @@ use Carbon\Carbon;
 use Auth;
 use DB;
 use PDF;
+use chillerlan\QRCode\{QRCode, QROptions, Common\EccLevel};
+use chillerlan\QRCode\Output\QRGdImagePNG;
 
 use App\Student;
 use App\StudentAccDetail;
@@ -21,6 +23,7 @@ use App\StudentExamResult;
 use App\CourseGrade;
 use App\Regulation;
 use App\Batch;
+use App\Transcript;
 
 use App\Settings;
 
@@ -267,7 +270,21 @@ class AdminTranscriptController extends Controller
                $effectiveDate = $std->degree_effective_date ? date('d F Y', strtotime($std->degree_effective_date)) : '';
                $docYear = $std->degree_effective_date ? date('Y', strtotime($std->degree_effective_date)) : date('Y');
                $docId = 'RUSL/FOA/' . $docYear . '/TR/' . str_pad($std->id, 3, '0', STR_PAD_LEFT);
-               $verifyUrl = url('/verify/transcript/' . str_replace('/', '-', $std->index_no));
+
+               // Verification URL encoded into QR code — pre-fills Document ID on the landing page
+              // $verifyUrl = url('/verify') . '?doc=' . urlencode($docId);
+              // New – uses the APP_URL you set in .env
+$verifyUrl = rtrim(config('app.url'), '/') . '/verify?doc=' . urlencode($docId);
+
+
+               // Generate QR code as PNG using GD (no imagick needed)
+               $qrOptions = new QROptions([
+                   'outputInterface' => QRGdImagePNG::class,
+                   'eccLevel'        => EccLevel::M,
+                   'scale'           => 5,
+                   'imageBase64'     => true,
+               ]);
+               $qrBase64 = (new QRCode($qrOptions))->render($verifyUrl);
 
                $data[$std->id] = [
                    'id' => $std->id,
@@ -279,6 +296,7 @@ class AdminTranscriptController extends Controller
                    'admission_date' => $admissionDate,
                    'document_id' => $docId,
                    'verify_url' => $verifyUrl,
+                   'qr_base64' => $qrBase64,
                    'class' => $std->class,
                    'program' => $std->program,
                    'program_short' => $std->program_short ? '[' . $std->program_short . ']' : '[BSc Hons (Agri)]',
@@ -289,6 +307,22 @@ class AdminTranscriptController extends Controller
                    'semester_stats' => [],
                    'results' => []
                ];
+
+               // Auto-register in the transcript issuance registry
+               Transcript::updateOrCreate(
+                   ['document_id' => $docId],
+                   [
+                       'student_id'     => $std->id,
+                       'degree_name'    => $std->program,
+                       'fgpa'           => $std->final_gpa,
+                       'class_name'     => $std->class,
+                       'effective_date' => $std->degree_effective_date ?: null,
+                       'status'         => 'active',
+                       'issued_by'      => Auth::id(),
+                       'issued_at'      => Carbon::now(),
+                   ]
+               );
+
                $studentIds[] = $std->id;
             } 
 

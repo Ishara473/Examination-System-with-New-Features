@@ -117,7 +117,7 @@ table.sigs td { width: 33.33%; border: .5pt solid #000000; height: 13mm; vertica
 @foreach($data as $student)
 
 @php
-    $qrPath = public_path('images/qr-code.png');
+    // QR code is now generated as base64 PNG in the controller and passed via $student['qr_base64']
 @endphp
 
 <!-- ===================== PAGE 1 ===================== -->
@@ -143,6 +143,12 @@ table.sigs td { width: 33.33%; border: .5pt solid #000000; height: 13mm; vertica
         <div class="lh-line">General: +94 25 2235103 &nbsp;<a href="http://www.agri.rjt.ac.lk/">www.agri.rjt.ac.lk</a></div>
         <div class="lh-line">Dean: +94 25 222 1610 &nbsp;<a href="mailto:dean@agri.rjt.ac.lk">dean@agri.rjt.ac.lk</a></div>
         <div class="lh-line">Senior Assistant Registrar: +94 25 222 1613 &nbsp;<a href="mailto:sar@agri.rjt.ac.lk">sar@agri.rjt.ac.lk</a></div>
+      </td>
+      <td class="lh-qr">
+        @if(!empty($student['qr_base64']))
+          <img src="{{ $student['qr_base64'] }}" style="width:17.6mm;height:17.6mm;">
+          <div class="qrcap">Scan to verify</div>
+        @endif
       </td>
     </tr></table>
 

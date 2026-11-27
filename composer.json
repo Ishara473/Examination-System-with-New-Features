@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.4",
         "barryvdh/laravel-dompdf": "^3.0",
+        "chillerlan/php-qrcode": "^6.0",
         "guzzlehttp/guzzle": "^7.8",
         "konekt/html": "^6.5",
         "laravel/framework": "^13.8",
@@ -16,6 +17,7 @@
         "maatwebsite/excel": "^3.1",
         "maennchen/zipstream-php": "2.1",
         "myclabs/php-enum": "^1.8",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^8.0"
     },
     "require-dev": {

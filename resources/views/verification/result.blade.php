@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        @if($isValid) ✅ Valid Transcript
+        @else ⚠️ Not Found
+        @endif
+        | Faculty of Agriculture, RUSL
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #7b1113 0%, #4a0a0b 50%, #1a0304 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1.5rem;
+        }
+
+        /* Main card */
+        .card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            max-width: 760px;
+            width: 100%;
+            overflow: hidden;
+            animation: fadeUp .45s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header section inside card */
+        .card-header {
+            padding: 2rem 2.5rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid #f3f0eb;
+        }
+
+        .card-header.valid-header {
+            padding: 1.25rem 2rem;
+            text-align: left;
+            background: #e6f7f1;
+            border-bottom: 1px solid #bbf7d0;
+        }
+        .valid-header .status-badge { margin-bottom: .65rem; }
+        .valid-header h1 { font-size: 1.25rem; margin-bottom: .2rem; }
+        .valid-header p.sub { font-size: .82rem; }
+
+        .logo-wrap { margin-bottom: 1.2rem; }
+        .logo-wrap img { height: 60px; object-fit: contain; }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .55rem 1.2rem;
+            border-radius: 99px;
+            font-size: .82rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            margin-bottom: 1rem;
+        }
+        .status-badge.valid   { background: #d1fae5; color: #065f46; border: 1.5px solid #6ee7b7; }
+        .status-badge.revoked { background: #fee2e2; color: #7f1d1d; border: 1.5px solid #fca5a5; }
+        .status-badge.unknown { background: #fef3c7; color: #78350f; border: 1.5px solid #fde68a; }
+
+        .card-header h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: .3rem;
+        }
+        .card-header p.sub {
+            font-size: .87rem;
+            color: #6b7280;
+        }
+
+        /* Card body */
+        .card-body { padding: 1.8rem 2.5rem; }
+
+        .doc-meta {
+            display: flex;
+            gap: 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid #cbd5e1;
+            padding: 14px 32px;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+        .doc-meta div { display: flex; flex-direction: column; gap: 2px; }
+        .doc-meta .lbl { color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+        .doc-meta .val { font-weight: 600; }
+
+        /* Section label */
+        .section-lbl {
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: .85rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .section-lbl::after {
+            content: '';
+            flex: 1;
+            border-top: 1px solid #f0ebe4;
+        }
+        .section-lbl + .info-grid { margin-bottom: 1.4rem; }
+
+        /* Info grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .65rem;
+        }
+        .info-cell {
+            background: #fdfaf7;
+            border: 1px solid #f0ebe4;
+            border-radius: 10px;
+            padding: .8rem 1rem;
+        }
+        .info-cell.full { grid-column: 1 / -1; }
+        .info-cell .lbl {
+            font-size: .67rem;
+            font-weight: 700;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: .2rem;
+        }
+        .info-cell .val {
+            font-size: .95rem;
+            font-weight: 600;
+            color: #111827;
+            line-height: 1.3;
+        }
+        .info-cell .val.mono {
+            font-family: 'Courier New', monospace;
+            font-size: .85rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+        }
+        .info-cell .val.gpa {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #7b1113;
+        }
+        .info-cell .val.active-status {
+            color: #059669;
+            font-weight: 700;
+        }
+
+        /* Verified stamp */
+        .stamp {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .85rem;
+            margin-top: 1.3rem;
+        }
+        .stamp-icon {
+            width: 40px; height: 40px;
+            background: #059669;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+            font-size: .95rem;
+            flex-shrink: 0;
+        }
+        .stamp-text { font-size: .8rem; color: #166534; line-height: 1.55; }
+        .stamp-text strong { display: block; font-weight: 700; color: #14532d; margin-bottom: .1rem; }
+
+        .download-application {
+            margin-top: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .9rem 1rem;
+            border-radius: 10px;
+            background: #7b1113;
+            color: white;
+            text-decoration: none;
+            transition: background .2s, transform .15s;
+        }
+        .download-application:hover { background: #5f0d0f; color: white; transform: translateY(-1px); }
+        .download-application > i { font-size: 1.15rem; }
+        .download-application strong { display: block; font-size: .87rem; }
+        .download-application small { display: block; margin-top: .15rem; color: rgba(255,255,255,.75); font-size: .72rem; }
+        .download-expiry { margin-top: .45rem; color: #9ca3af; font-size: .7rem; text-align: center; }
+
+        .notice-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #92400e;
+            line-height: 1.7;
+        }
+        .notice-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+        .cta-box { background: linear-gradient(135deg, #1a3a6b 0%, #2a5298 100%); border-radius: 10px; padding: 22px 24px; color: white; }
+        .cta-box h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+        .cta-box p { font-size: 13px; color: rgba(255,255,255,.8); line-height: 1.6; margin-bottom: 16px; }
+        .cta-box .download-application { display: inline-flex; margin-top: 0; background: #c8972b; color: white; }
+        .cta-box .download-application:hover { background: #b07e20; }
+        .cta-box .download-expiry { color: rgba(255,255,255,.7); text-align: left; }
+
+        /* Warning / danger panels */
+        .panel-danger {
+            background: #fff5f5;
+            border: 1.5px solid #fecaca;
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin-top: .8rem;
+        }
+        .panel-danger .lbl { font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #ef4444; margin-bottom: .25rem; }
+        .panel-danger .val { font-size: .9rem; color: #7f1d1d; font-weight: 500; }
+
+        .panel-warn {
+            background: #fffbeb;
+            border: 1.5px solid #fde68a;
+            border-radius: 10px;
+            padding: 1.1rem 1.3rem;
+            font-size: .87rem;
+            color: #78350f;
+            line-height: 1.7;
+        }
+
+        /* Card footer */
+        .card-footer {
+            padding: 1.1rem 2.5rem 1.5rem;
+            border-top: 1px solid #f3f0eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-uni {
+            font-size: .75rem;
+            color: #9ca3af;
+            line-height: 1.5;
+        }
+        .footer-uni strong { display: block; font-weight: 600; color: #4b5563; font-size: .8rem; }
+
+        .btn-verify-another {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .6rem 1.2rem;
+            background: linear-gradient(135deg, #7b1113, #a31517);
+            color: white;
+            border-radius: 8px;
+            font-size: .82rem;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(123,17,19,.3);
+            transition: opacity .2s, transform .15s;
+        }
+        .btn-verify-another:hover { opacity: .9; transform: translateY(-1px); }
+
+        /* Page copyright below card */
+        .page-footer {
+            margin-top: 1.8rem;
+            font-size: .75rem;
+            color: rgba(255,255,255,.45);
+            text-align: center;
+            line-height: 1.7;
+        }
+        .page-footer a { color: rgba(255,255,255,.65); text-decoration: none; }
+        .page-footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .card-body, .card-header, .card-footer { padding-left: 1.4rem; padding-right: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    {{-- Header --}}
+    <div class="card-header {{ $isValid ? 'valid-header' : '' }}">
+        @if(!$isValid)
+        <div class="logo-wrap">
+            <img src="{{ asset('img/logo.png') }}" alt="RUSL" onerror="this.style.display='none'">
+        </div>
+        @endif
+
+        @if($isValid)
+            <div class="status-badge valid"><i class="fas fa-circle-check"></i> Valid - Officially Issued Transcript</div>
+            <h1>Authenticity Confirmed</h1>
+            <p class="sub">This transcript is authentic and currently active.</p>
+        @else
+            <div class="status-badge unknown"><i class="fas fa-triangle-exclamation"></i> Record Not Found</div>
+            <h1>No Matching Transcript</h1>
+            <p class="sub">The details you provided do not match any record in our system.</p>
+        @endif
+    </div>
+
+    @if($isValid)
+    <div class="doc-meta">
+        <div><span class="lbl">Document ID</span><span class="val">{{ $transcript->document_id }}</span></div>
+        <div><span class="lbl">Date Issued</span><span class="val">{{ $transcript->issued_at ? $transcript->issued_at->format('d F Y') : '—' }}</span></div>
+        <div><span class="lbl">Verified At</span><span class="val">{{ now()->format('d M Y, H:i') }} IST</span></div>
+        <div><span class="lbl">Status</span><span class="val" style="color:#059669;">● Active</span></div>
+    </div>
+    @endif
+
+    {{-- Body --}}
+    <div class="card-body">
+
+        @if($isValid)
+            <p class="section-lbl"><i class="fas fa-user"></i> Student Information</p>
+            <div class="info-grid">
+                <div class="info-cell">
+                    <div class="lbl">Full Name</div>
+                    <div class="val">{{ $transcript->student->full_name ?? '—' }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="lbl">Index Number</div>
+                    <div class="val">{{ $transcript->student->index_no ?? '—' }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="lbl">Registration No</div>
+                    <div class="val">{{ $transcript->student->registration_no ?? '—' }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="lbl">Document ID</div>
+                    <div class="val mono">{{ $transcript->document_id }}</div>
+                </div>
+            </div>
+
+            <p class="section-lbl"><i class="fas fa-graduation-cap"></i> Academic Details</p>
+            <div class="info-grid">
+                <div class="info-cell full">
+                    <div class="lbl">Degree Awarded</div>
+                    <div class="val">{{ $transcript->degree_name ?? '—' }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="lbl">Class</div>
+                    <div class="val">{{ $transcript->class_name ?? '—' }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="lbl">Final GPA</div>
+                    <div class="val gpa">{{ $transcript->fgpa ?? '—' }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="lbl">Issued At</div>
+                    <div class="val">{{ $transcript->issued_at ? $transcript->issued_at->format('d M Y') : '—' }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="lbl">Status</div>
+                    <div class="val active-status"><i class="fas fa-circle-check"></i> Active</div>
+                </div>
+            </div>
+
+            <div class="stamp">
+                <div class="stamp-icon"><i class="fas fa-lock"></i></div>
+                <div class="stamp-text">
+                    <strong>Officially Verified</strong>
+                    Faculty of Agriculture, Rajarata University of Sri Lanka &mdash; verified {{ now()->format('d M Y \a\t H:i') }} (IST)
+                </div>
+            </div>
+
+            <div class="notice-box">
+                <h4><i class="fas fa-lock"></i> Official Data Restriction Notice</h4>
+                This service confirms <strong>authenticity and final award status only</strong>.
+                Individual course results, semester GPAs, and credit breakdowns are
+                <strong>not published online</strong> as they form part of the university's confidential academic records.
+            </div>
+
+            <div class="cta-box">
+                <h4>Need a Detailed Certified Verification Report?</h4>
+                <p>For professional licensing boards, immigration authorities, or postgraduate admission purposes, the Examinations Division provides an official certified verification letter with full course details. Processing time: 5-10 working days.</p>
+                @if($applicationFormUrl)
+                <a href="{{ $applicationFormUrl }}" class="download-application">
+                    <i class="fas fa-file-arrow-down"></i>
+                    <span>
+                        <strong>Download Application Form</strong>
+                        <small>Pre-filled with the verified transcript details</small>
+                    </span>
+                </a>
+                <p class="download-expiry">This secure download link expires in 10 minutes.</p>
+                @endif
+            </div>
+
+        @else
+            <div class="panel-warn">
+                <i class="fas fa-magnifying-glass" style="margin-right:.4rem;"></i>
+                No transcript record matches Document ID <strong>{{ $documentId }}</strong> with the Index Number you provided.
+                Please double-check both values as printed on the transcript and try again.
+                <br><br>
+                If the issue persists, contact the Faculty of Agriculture Examination Division.
+            </div>
+        @endif
+
+    </div>
+
+    {{-- Footer --}}
+    <div class="card-footer">
+        <div class="footer-uni">
+            <strong>Faculty of Agriculture</strong>
+            Rajarata University of Sri Lanka
+        </div>
+        <a href="{{ url('/verify') }}" class="btn-verify-another">
+            <i class="fas fa-arrow-left"></i> Verify Another
+        </a>
+    </div>
+
+</div>
+
+<p class="page-footer">
+    &copy; {{ date('Y') }} Faculty of Agriculture, Rajarata University of Sri Lanka.<br>
+    Having trouble? <a href="#">Contact the Examination Division</a>
+</p>
+
+</body>
+</html>

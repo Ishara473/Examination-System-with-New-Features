@@ -17,6 +17,21 @@
     <link href="{{ asset('backend/css/sb-admin-2.min.css') }}" rel="stylesheet">
     <link href="{{ asset('plugins/fontawesome/css/fontawesome.min.css') }}" rel="stylesheet">
     <link href="{{ asset('plugins/fontawesome/css/solid.min.css') }}" rel="stylesheet">
+    <style>
+        #content-wrapper {
+            min-height: 100vh;
+        }
+
+        #content-wrapper > .content {
+            flex: 1 0 auto;
+        }
+
+        #content-wrapper > footer.sticky-footer {
+            position: relative;
+            z-index: 1;
+            background: #f8f9fc;
+        }
+    </style>
     @yield('custom-css')
 </head>
 <body id="page-top">   
@@ -122,14 +137,15 @@
        
 
             @if(( Auth::user()->hasPermissionTo('transcript:print') || Auth::user()->hasRole('Admin')))
-            <li class="nav-item {{ Request::is('admin/transcripts*')?'active':'' }}">
-                <a class="nav-link {{ Request::is('admin/transcripts*')?'':'collapsed' }}" aria-expanded="{{ Request::is('admin/transcripts*')?'true':'false' }}" data-toggle="collapse" href="#" data-target="#main-nav-transcripts" ><i data-feather="layers" class="mr-1"></i><span>Transcripts</span></a>
-                <div class="collapse {{ Request::is('admin/transcripts*')?'show':'' }}" id="main-nav-transcripts">
+            <li class="nav-item {{ (Request::is('admin/transcripts*') || Request::is('transcripts*') || Request::routeIs('admin.verification-audit-logs.*'))?'active':'' }}">
+                <a class="nav-link {{ (Request::is('admin/transcripts*') || Request::is('transcripts*') || Request::routeIs('admin.verification-audit-logs.*'))?'':'collapsed' }}" aria-expanded="{{ (Request::is('admin/transcripts*') || Request::is('transcripts*') || Request::routeIs('admin.verification-audit-logs.*'))?'true':'false' }}" data-toggle="collapse" href="#" data-target="#main-nav-transcripts" ><i data-feather="layers" class="mr-1"></i><span>Transcripts</span></a>
+                <div class="collapse {{ (Request::is('admin/transcripts*') || Request::is('transcripts*') || Request::routeIs('admin.verification-audit-logs.*'))?'show':'' }}" id="main-nav-transcripts">
                     <div class="collapse-inner">
                         <a class="collapse-item" href="{{url('/admin/transcripts/semester-transcripts')}}">Statement of Semester Results</a>
                         <a class="collapse-item" href="{{url('/admin/transcripts/final-transcripts')}}">Final Transcript</a>
                         <a class="collapse-item" href="{{url('/admin/transcripts/final-detail-certificate')}}">Detailed Results Sheet</a>
-
+                        <a class="collapse-item" href="{{ route('transcripts.index') }}">Issued Transcripts</a>
+                        <a class="collapse-item" href="{{ route('admin.verification-audit-logs.index') }}">Verification Audit</a>
                     </div>
                 </div>
             </li>
